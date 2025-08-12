@@ -19,6 +19,7 @@ import {
 import Loader from "../components/Custom/Loader";
 import axios from "axios";
 const Attendance = () => {
+  const [studentData, setStudentData] = useState([])
   const [activeTab, setActiveTab] = useState("attendance");
   const [data, setData] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
@@ -29,8 +30,14 @@ const Attendance = () => {
   const [totalCourses, setTotalCourses] = useState(0);
 
 
-
-
+  useEffect(() => {
+    setLoading(true);
+    fetch("http://localhost:3001/demographic-summary")
+      .then(res => res.json())
+      .then(data => setStudentData(data))
+      .catch(err => console.error(err));
+      setLoading(false);
+  }, []);
 
   const fetchdata = async () => {
     setLoading(true);
@@ -39,11 +46,14 @@ const Attendance = () => {
       if (response.status === 200) {
         const courseData = response.data;
   
-        // metrics object hai response ke andar
-        const metrics = courseData.metrics;
+        // metrics array exist karta hai?
+        const metrics = courseData.metrics || [];
   
-        // total_courses metrics ke andar se
-        const totalCourses = metrics.total_courses || courseData.total_courses || 0;
+        // metrics ke andar se total_courses nikalna (max ya sum)
+        const totalCourses =
+          metrics.length > 0
+            ? Math.max(...metrics.map((m) => m.total_courses || 0))
+            : courseData.total_courses || 0;
   
         setTotalCourses(totalCourses);
         setData(courseData);
@@ -53,6 +63,7 @@ const Attendance = () => {
     }
     setLoading(false);
   };
+  
   
   useEffect(() => {
     fetchdata();
@@ -464,7 +475,7 @@ const Attendance = () => {
         )}
         {activeTab === "overview" && <Overview />}
         {activeTab === "courses" && <Courses />}
-        {activeTab === "students" && <Student data={data.student_wise} />}
+        {activeTab === "students" && <Student data={studentData} />}
       </motion.div>
     </motion.div>
   );

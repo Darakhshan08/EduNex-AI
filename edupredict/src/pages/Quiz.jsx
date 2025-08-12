@@ -34,7 +34,7 @@ function Quiz() {
   
   useEffect(() => {
     if (!selectedBatch || selectedBatch === "Select Batch") {
-      setFilteredData([]);
+      setFilteredData(quizData);
     } else {
       const filtered = quizData.filter((item) => item.batch === selectedBatch);
       setFilteredData(filtered);

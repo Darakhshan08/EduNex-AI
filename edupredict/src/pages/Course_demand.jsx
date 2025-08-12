@@ -63,9 +63,9 @@ const Course_demand = () => {
               <th className="text-left py-3 px-4 font-medium text-gray-600">
                 Preferred Course
               </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
+              {/* <th className="text-left py-3 px-4 font-medium text-gray-600">
                 Course
-              </th>
+              </th> */}
               <th className="text-left py-3 px-4 font-medium text-gray-600">
                Actual Course Demand
               </th>
@@ -84,11 +84,11 @@ const Course_demand = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <td className="py-3 px-4 text-gray-800">
-                    {student.preferred_course}
+                    {student.course}
                   </td>
-                  <td className="py-3 px-4 text-gray-800">
+                  {/* <td className="py-3 px-4 text-gray-800">
                     {student.course_id}
-                  </td>
+                  </td> */}
                  
                   <td className="py-3 px-4">
                     <span
