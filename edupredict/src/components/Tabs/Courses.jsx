@@ -114,14 +114,14 @@ export const Courses = () => {
           </p>
 
           <div className="space-y-1">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Present: {payload.find(p => p.dataKey === 'present')?.value}%
+            <p className="text-sm text-[#9078e2] dark:text-green-400 font-medium flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#9078e2] inline-block"></span> Present: {payload.find(p => p.dataKey === 'present')?.value}%
             </p>
-            <p className="text-sm text-yellow-500 dark:text-yellow-400 font-medium flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span> Late: {payload.find(p => p.dataKey === 'late')?.value}%
+            <p className="text-sm text-[#ff7e67] dark:text-yellow-400 font-medium flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#ff7e67] inline-block"></span> Late: {payload.find(p => p.dataKey === 'late')?.value}%
             </p>
-            <p className="text-sm text-red-600 dark:text-red-400 font-medium flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Absent: {payload.find(p => p.dataKey === 'absent')?.value}%
+            <p className="text-sm text-[#c4bef0] dark:text-red-400 font-medium flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#c4bef0] inline-block"></span> Absent: {payload.find(p => p.dataKey === 'absent')?.value}%
             </p>
           </div>
         </div>
@@ -133,9 +133,9 @@ export const Courses = () => {
 
 
               <Legend />
-              <Bar dataKey="present" fill="#4F75FF" />
-              <Bar dataKey="late" fill="#0096FF" />
-              <Bar dataKey="absent" fill="#00D7FF" />
+              <Bar dataKey="present" fill="#9078e2" />
+              <Bar dataKey="late" fill="#ff7e67" />
+              <Bar dataKey="absent" fill="#c4bef0" />
             </BarChart>
           </ResponsiveContainer>
         </div>

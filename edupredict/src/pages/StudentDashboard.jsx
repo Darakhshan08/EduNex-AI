@@ -13,7 +13,6 @@ import StudentTop from "../components/Tabs/StudentTop";
 import { Link, useNavigate } from "react-router-dom";
 import {
   attendance_course_performance,
-  dropout_risk_percentage,
   teacher_analysis,
 } from "../Api/internal";
 import Loader from "../components/Custom/Loader";
@@ -90,7 +89,7 @@ const StudentDashboard = () => {
           risk: item.risk_level,
         }));
 
-        setData(formatted.slice(0, 7)); // Only first 5 unique records
+        setData(formatted.slice(0, 5)); // Only first 5 unique records
       }
     } catch (error) {
       console.log("Error fetching dropout risk data:", error);
@@ -102,6 +101,46 @@ const StudentDashboard = () => {
   useEffect(() => {
     dropData();
   }, []);
+
+
+  // const quizData = async () => {
+  //   try {
+  //     const res = await axios.get("http://localhost:3001/quiz-summary");
+  //     if (res.status === 200) {
+  //       // Remove duplicates based on course_id and teacher_name
+  //       const unique = res.data.filter(
+  //         (item, index, self) =>
+  //           index ===
+  //           self.findIndex(
+  //             (t) =>
+  //               t.course_id === item.course_id &&
+  //               t.teacher_name === item.teacher_name
+  //           )
+  //       );
+  
+  //       // Format the data
+  //       const format = unique.map((item) => ({
+  //         course: item.course_id,
+  //         teacher: item.teacher_name,
+  //         quiz: item.quizzes_completed,
+  //       }));
+  
+  //       setData(format.slice(0, 4)); // Only first 7 unique records
+  //     }
+  //   } catch (error) {
+  //     console.log("Error fetching quiz summary:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+  // useEffect(() => {
+  //   quizData();
+  // }, []);
+  
+
+
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -151,8 +190,6 @@ const StudentDashboard = () => {
     },
   };
 
-  const assignments = ["C101", "C102", "C103"];
-
   return (
     <>
       <motion.div
@@ -197,14 +234,14 @@ const StudentDashboard = () => {
                 <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
                 <Bar
                   dataKey="avg_attendance" // show only avg attendance
-                  fill="#3b82f6"
+                  fill="#9078e2"
                   radius={[0, 6, 6, 0]}
                   animationDuration={800}
                 />
               </BarChart>
             </ResponsiveContainer>
 
-            <motion.div
+            {/* <motion.div
               className="mt-4 pt-4 "
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -219,7 +256,7 @@ const StudentDashboard = () => {
                   View All
                 </Link>
               </motion.button>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
 
           <motion.div
@@ -283,6 +320,75 @@ const StudentDashboard = () => {
     </motion.button>
   </motion.div> */}
           </motion.div>
+
+
+          {/* <motion.div
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <span className="inline-block w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
+              Quiz Overview
+            </h2>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
+                      Course
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
+                      Teacher
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <td className="px-4 py-2 text-gray-800  border-b border-gray-200">
+                        {item.course}
+                      </td>
+                      <td className="px-4 py-2 text-gray-800 border-b border-gray-200">
+                        {item.teacher}
+                      </td>
+                      <td className="px-4 py-2 text-gray-800 border-b border-gray-200">
+                        {item.quiz}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+           <motion.div
+    className="mt-4 pt-4 border-t"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.5 }}
+  >
+    <motion.button
+      className="w-full px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-colors duration-200 text-sm font-medium"
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+    >
+      View All Courses
+    </motion.button>
+  </motion.div>
+          </motion.div> */}
+
+
+
+
+
+
 
           {/* <motion.div
           className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"

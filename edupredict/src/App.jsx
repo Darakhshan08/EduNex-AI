@@ -80,6 +80,14 @@ export function App() {
                     </AuthLayout>
                   }
                 />
+                <Route
+                  path="/dataset"
+                  element={
+                    <AuthLayout token={"admin"}>
+                      <Dataset />
+                    </AuthLayout>
+                  }
+                />
               
                 <Route
                   path="/history"

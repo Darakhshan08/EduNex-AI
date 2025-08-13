@@ -168,8 +168,8 @@ const fetchData = async () => {
                     }}
                   />
 
-                  <Bar dataKey="present" fill="#4F75FF" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="absent" fill="#00D7FF" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="present" fill="#9078e2" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="absent" fill="#ff7e67" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

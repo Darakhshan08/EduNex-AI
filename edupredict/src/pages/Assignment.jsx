@@ -50,7 +50,7 @@ function Assignments() {
   if (loading || !formattedData) return <Loader />;
 
   return (
-    <div className="flex w-full min-h-screen justify-center items-center p-4">
+    <div className="flex w-full min-h-screen  justify-center items-center p-4">
       <div className="w-full max-w-7xl bg-white rounded-xl p-6 md:p-10 shadow-sm">
         <div className="flex flex-col gap-8">
           {/* Chart Section */}
@@ -155,7 +155,7 @@ function Assignments() {
                   />
                   <Bar
                     dataKey="score"
-                    fill="#4F75FF"
+                    fill="#9078e2"
                     radius={[4, 4, 0, 0]}
                     barSize={100}
                   />
@@ -179,6 +179,9 @@ function Assignments() {
                     <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
                       Courses
                     </th>
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
+                      Month
+                    </th>
                     <th className="py-3 px-4 text-right text-gray-600 font-medium border-b-2 border-gray-200">
                       Total Assignments
                     </th>
@@ -192,6 +195,9 @@ function Assignments() {
                     >
                       <td className="py-4 px-4 text-gray-800 font-medium">
                         {item.name}
+                      </td>
+                      <td className="py-4 px-4 text-gray-800 font-medium">
+                        {item.month}
                       </td>
                       <td className="py-4 px-4 text-right font-semibold text-gray-700">
                         {item.total}

@@ -213,7 +213,7 @@ const Attendance = () => {
         }}
       >
         <motion.div
-          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-green-500 hover:shadow-lg transition-all duration-300"
+          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
           variants={{
             hidden: { opacity: 0, y: 20 },
             visible: { opacity: 1, y: 0 },
@@ -221,16 +221,16 @@ const Attendance = () => {
           whileHover={{ y: -6, transition: { duration: 0.2 } }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <Book size={32} className="text-green-600" />
+            <Book size={32} className="text-[#9078e2]" />
             <div className="text-md text-gray-600">Total Courses</div>
           </div>
-          <div className="text-3xl font-extrabold text-green-600">
+          <div className="text-3xl font-bold text-[#333333]">
             {totalCourses}
           </div>
         </motion.div>
 
         <motion.div
-          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300"
+          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
           variants={{
             hidden: { opacity: 0, y: 20 },
             visible: { opacity: 1, y: 0 },
@@ -238,16 +238,16 @@ const Attendance = () => {
           whileHover={{ y: -6, transition: { duration: 0.2 } }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <GraduationCapIcon size={32} className="text-blue-600" />
+            <GraduationCapIcon size={32} className="text-[#9078e2]" />
             <div className="text-md text-gray-600">Total Student</div>
           </div>
-          <div className="text-3xl font-extrabold text-blue-600">
+          <div className="text-3xl font-bold text-[#333333]">
             {totalStudents}
           </div>
         </motion.div>
 
         <motion.div
-          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-red-500 hover:shadow-lg transition-all duration-300"
+          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
           variants={{
             hidden: { opacity: 0, y: 20 },
             visible: { opacity: 1, y: 0 },
@@ -255,16 +255,16 @@ const Attendance = () => {
           whileHover={{ y: -6, transition: { duration: 0.2 } }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <UsersIcon size={32} className="text-red-600" />
+            <UsersIcon size={32} className="text-[#9078e2]" />
             <div className="text-md text-gray-600">Total Teacher</div>
           </div>
-          <div className="text-3xl font-extrabold text-red-600">
+          <div className="text-3xl font-bold text-[#333333]">
             {totalTeachers}
           </div>
         </motion.div>
 
         <motion.div
-          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-yellow-500 hover:shadow-lg transition-all duration-300"
+          className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
           variants={{
             hidden: { opacity: 0, y: 20 },
             visible: { opacity: 1, y: 0 },
@@ -272,10 +272,10 @@ const Attendance = () => {
           whileHover={{ y: -6, transition: { duration: 0.2 } }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <BarChart2Icon size={28} className="text-yellow-600" />
+            <BarChart2Icon size={28} className="text-[#9078e2]" />
             <div className="text-sm text-gray-600">Attendance Rate</div>
           </div>
-          <div className="text-3xl font-extrabold text-yellow-600">87%</div>
+          <div className="text-3xl font-bold text-[#333333]">87%</div>
         </motion.div>
       </motion.div>
       {/* Tab Navigation */}
@@ -450,7 +450,7 @@ const Attendance = () => {
                         onClick={() => setCurrentPage(index + 1)}
                         className={`px-3 py-1 border rounded text-sm ${
                           currentPage === index + 1
-                            ? "bg-indigo-500 text-white"
+                            ? "bg-[#9078e2] text-white"
                             : "bg-white"
                         }`}
                       >
@@ -488,7 +488,7 @@ const TabButton = ({ active, onClick, label }) => (
     transition-colors duration-200
       ${
         active
-          ? "bg-indigo-600 text-white"
+          ? "bg-[#9078e2] text-white"
           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
       }`}
   >

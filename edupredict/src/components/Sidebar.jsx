@@ -207,6 +207,15 @@ const Sidebar = () => {
                 </motion.li>
                 <motion.li variants={itemVariants}>
                   <NavLink
+                    to="/dataset"
+                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                  >
+                    <ChartColumnBig size={26} />
+                    {open && <span>Dataset</span>}
+                  </NavLink>
+                </motion.li>
+                <motion.li variants={itemVariants}>
+                  <NavLink
                     to="/prediction"
                     className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
                   >
@@ -214,6 +223,7 @@ const Sidebar = () => {
                     {open && <span>Prediction</span>}
                   </NavLink>
                 </motion.li>
+
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/feedback"
