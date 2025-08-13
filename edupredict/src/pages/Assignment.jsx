@@ -79,6 +79,12 @@ function Assignments() {
                     <option value="B004">B004</option>
                     <option value="B005">B005</option>
                     <option value="B006">B006</option>
+                    <option value="B007">B007</option>
+                    <option value="B008">B008</option>
+                    <option value="B009">B009</option>
+                    <option value="B010">B010</option>
+                    <option value="B011">B011</option>
+
                     {/* <option value="April">April</option>
                     <option value="May">May</option>
                     <option value="June">June</option>

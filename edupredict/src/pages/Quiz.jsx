@@ -31,7 +31,7 @@ function Quiz() {
         setLoading(false);
       });
   }, []);
-  
+
   useEffect(() => {
     if (!selectedBatch || selectedBatch === "Select Batch") {
       setFilteredData(quizData);
@@ -66,7 +66,7 @@ function Quiz() {
                 </p>
               </div>
               <div className="flex gap-3 w-full sm:w-auto">
-              <div className="relative">
+                <div className="relative">
                   <select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
@@ -79,6 +79,12 @@ function Quiz() {
                     <option value="B004">B004</option>
                     <option value="B005">B005</option>
                     <option value="B006">B006</option>
+                    <option value="B007">B007</option>
+                    <option value="B008">B008</option>
+                    <option value="B009">B009</option>
+                    <option value="B010">B010</option>
+                    <option value="B011">B011</option>
+
                     {/* <option value="April">April</option>
                     <option value="May">May</option>
                     <option value="June">June</option>
@@ -106,7 +112,7 @@ function Quiz() {
                 </button>
               </div>
             </div>
-            
+
             <div className="h-[300px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -131,7 +137,7 @@ function Quiz() {
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-white border shadow p-2 rounded text-sm text-gray-700">
-                           <p>Month: {payload[0].payload.month}</p>
+                            <p>Month: {payload[0].payload.month}</p>
                             <p className="font-semibold">
                               Course: {payload[0].payload.name}
                             </p>
@@ -165,7 +171,7 @@ function Quiz() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                  <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
                       Month
                     </th>
                     <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
@@ -182,7 +188,7 @@ function Quiz() {
                       key={index}
                       className="border-b border-gray-100 hover:bg-gray-100 transition-colors"
                     >
-                        <td className="py-4 px-4 text-gray-800 font-medium">
+                      <td className="py-4 px-4 text-gray-800 font-medium">
                         {item.month}
                       </td>
                       <td className="py-4 px-4 text-gray-800 font-medium">

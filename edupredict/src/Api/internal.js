@@ -200,7 +200,15 @@ export const teacher_analysis = async () => {
   }
   return response;
 };
-
+export const dropout_risk_percentage = async () => {
+  let response;
+  try {
+    response = await api.get(`/dropout_risk_percentage`);
+  } catch (error) {
+    return error;
+  }
+  return response;
+};
 export const dropout_risk_by_course = async () => {
   let response;
   try {

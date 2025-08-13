@@ -18,23 +18,24 @@ function StudentAttendance() {
   const [loading, setLoading] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState("Select Month");
 
-  const fetchdata = async () => {
-    setLoading(true);
-    try {
-      const response = await attendance_course_performance(); // your API call here
-      if (response.status === 200) {
-        setData(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching attendance data", error);
-    } finally {
-      setLoading(false);
+const fetchData = async () => {
+  setLoading(true);
+  try {
+    const response = await attendance_course_performance(selectedBatch); // pass batch
+    if (response.status === 200) {
+      setData(response.data.metrics || []);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching attendance data", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Initial fetch
   useEffect(() => {
-    fetchdata();
+    fetchData();
   }, []);
 
   // Filter data by month
@@ -103,6 +104,12 @@ function StudentAttendance() {
                   <option value="B004">B004</option>
                   <option value="B005">B005</option>
                   <option value="B006">B006</option>
+                  <option value="B007">B007</option>
+                  <option value="B008">B008</option>
+                  <option value="B009">B009</option>
+                  <option value="B010">B010</option>
+                  <option value="B011">B011</option>
+
                   {/* <option value="July">July</option>
               <option value="August">August</option>
               <option value="September">September</option>
