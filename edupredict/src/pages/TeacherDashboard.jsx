@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { teacher_analysis } from '../Api/internal';
+import { academic_performance, teacher_analysis } from '../Api/internal';
 import Loader from '../components/Custom/Loader';
 import TeacherTop from '../components/Tabs/TeacherTop';
+import PieCharts from '../components/Custom/PieChart';
 
 const TeacherDashboard = () => {
   const [courseData, setCourseData] = useState(null);
@@ -133,7 +134,7 @@ const TeacherDashboard = () => {
         </motion.div>
 
         {/* Risk Distribution Chart */}
-        <motion.div className="bg-white p-5 rounded-lg shadow-md" variants={itemVariants}>
+        {/* <motion.div className="bg-white p-5 rounded-lg shadow-md" variants={itemVariants}>
           <h2 className="text-lg font-semibold mb-4">Risk Distribution</h2>
           <div className="space-y-4">
             <div>
@@ -164,7 +165,8 @@ const TeacherDashboard = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
+<PieCharts  />
       </motion.div>
     </motion.div>
   );
