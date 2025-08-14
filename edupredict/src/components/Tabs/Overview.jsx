@@ -5,7 +5,7 @@ import { perform_attendance_trend_analysis } from "../../Api/internal";
 import GraphDropdown from "../Graph/GraphDropDown";
 import Loader from "../Custom/Loader";
 
-const COLORS = ["#4F75FF", "#00D7FF", "#F59E0B", "#EF4444"];
+const COLORS = ["#9078e2", "#ff7e67"];
 const CustomLegend = ({
   items
 }) => {
@@ -21,12 +21,12 @@ const CustomLegend = ({
 export const Overview = () => {
   
    const legendItems = [
-    { name: "Actual", color: "#4F75FF" },
-    { name: "Predicted", color: "#00D7FF" },
+    { name: "Actual", color: "#9078e2" },
+    { name: "Predicted", color: "#ff7e67" },
   ];
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [days, setDays] = useState(7);
+  const [days, setDays] = useState(12);
   const fetchdata = async () => {
     setLoading(true);
     const response = await perform_attendance_trend_analysis(days);
@@ -56,7 +56,7 @@ export const Overview = () => {
           <h2 className="text-lg font-medium text-gray-900 mb-4">
             Attendance Trend
           </h2>
-          <GraphDropdown setOption={setDays} />
+          {/* <GraphDropdown setOption={setDays} /> */}
         </div>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="90%">

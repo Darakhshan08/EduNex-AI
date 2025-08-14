@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { LineChartIcon, DownloadIcon, ChevronDownIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import Loader from "../components/Custom/Loader";
 
 function Prediction() {
+  const [loading, setLoading] = useState(true);
   const [predictionData, setPredictionData] = useState({
     Low: 0,
     Medium: 0,
@@ -15,6 +17,7 @@ function Prediction() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [riskRes, studentRes] = await Promise.all([
           axios.get("http://localhost:3001/dropout_risk_by_course"),
@@ -34,11 +37,12 @@ function Prediction() {
       } catch (err) {
         console.error("API Error:", err);
       }
+      setLoading(false);
     };
 
     fetchData();
   }, []);
-
+  if (loading) return <Loader />;
   const total =
     predictionData.Low + predictionData.Medium + predictionData.High;
   const getBarWidth = (count) => {
@@ -75,10 +79,10 @@ function Prediction() {
                   <div
                     className={`absolute left-0 top-0 h-full rounded transition-all duration-300 ${
                       level === "Low"
-                        ? "bg-[#4F75FF]"
+                        ? "bg-[#9078e2]"
                         : level === "Medium"
-                        ? "bg-[#0096FF]"
-                        : "bg-[#00D7FF]"
+                        ? "bg-[#c4bef0]"
+                        : "bg-[#ff7e67]"
                     }`}
                     style={{ width: getBarWidth(predictionData[level]) }}
                   ></div>
@@ -127,6 +131,9 @@ function Prediction() {
                     Student Name
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-600">
+                    Month
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-600">
                     Course
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-600">
@@ -158,6 +165,9 @@ function Prediction() {
                         >
                           <td className="py-3 px-4 text-gray-800">
                             {student.name}
+                          </td>
+                          <td className="py-3 px-4 text-gray-800">
+                            {student.Month}
                           </td>
                           <td className="py-3 px-4 text-gray-800">
                             {student.Course}

@@ -82,7 +82,7 @@ const Login = () => {
   return (
     <div className="flex w-full min-h-screen bg-gray-50">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-800 p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#9078e2] p-12 flex-col justify-between">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,7 +90,7 @@ const Login = () => {
           className="flex items-center"
         >
           <BookOpenIcon size={40} className="text-white" />
-          <span className="text-white text-3xl font-bold ml-2">EduPredict</span>
+          <span className="text-white text-3xl font-bold ml-2">EduNex AI</span>
         </motion.div>
 
         <motion.div
@@ -125,7 +125,7 @@ const Login = () => {
           </div>
         </motion.div>
 
-        <div className="text-white/60 text-sm">© 2025 EduPredict. All rights reserved.</div>
+        <div className="text-white/60 text-sm">© 2025 EduNex AI. All rights reserved.</div>
       </div>
 
       {/* Right Panel */}
@@ -138,8 +138,8 @@ const Login = () => {
         <div className="w-full max-w-md">
           <motion.div className="text-center mb-8" variants={itemVariants}>
             <div className="lg:hidden flex items-center justify-center mb-4">
-              <BookOpenIcon size={32} className="text-blue-600" />
-              <span className="text-2xl font-bold ml-2 text-blue-600">EduPredict</span>
+              <BookOpenIcon size={32} className="text-[#9078e2]" />
+              <span className="text-2xl font-bold ml-2 text-[#9078e2]">EduNex AI</span>
             </div>
             <h1 className="text-3xl font-extrabold text-gray-900">Welcome Back</h1>
             <p className="text-gray-600 mt-2">Sign in to continue to your dashboard</p>
@@ -153,7 +153,7 @@ const Login = () => {
                 {(isStudent || isTeacher) && (
                   <button
                     type="button"
-                    className="text-blue-600 text-sm hover:text-blue-800"
+                    className="text-[#9078e2] text-sm hover:text-blue-800"
                     onClick={() => {
                       setIsStudent(false);
                       setIsTeacher(false);
@@ -168,7 +168,7 @@ const Login = () => {
                 <motion.button
                   type="button"
                   className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
-                    isTeacher && 'border-blue-600 bg-blue-50 text-blue-700'
+                    isTeacher && 'border-[#9078e2] bg-[#f0ecfd] text-[#9078e2]'
                   }`}
                   onClick={() => {
                     setIsStudent(false);
@@ -178,16 +178,16 @@ const Login = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                    isTeacher ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                    <UserIcon size={30} className={isTeacher ? 'text-blue-600' : ''} />
+                    isTeacher ? 'bg-white' : 'bg-gray-100'}`}>
+                    <UserIcon size={30} className={isTeacher ? 'text-[#9078e2]' : ''} />
                   </div>
-                  <span className={`font-medium ${isTeacher ? 'text-blue-700' : ''}`}>Teacher</span>
+                  <span className={`font-medium ${isTeacher ? 'text-[#9078e2]' : ''}`}>Teacher</span>
                 </motion.button>
 
                 <motion.button
                   type="button"
                   className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
-                    isStudent && 'border-blue-600 bg-blue-50 text-blue-700'
+                    isStudent && 'border-[#9078e2] bg-[#f0ecfd] text-[#9078e2]'
                   }`}
                   onClick={() => {
                     setIsTeacher(false);
@@ -197,10 +197,10 @@ const Login = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                    isStudent ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                    <GraduationCapIcon size={30} className={isStudent ? 'text-blue-600' : ''} />
+                    isStudent ? 'bg-white' : 'bg-gray-100'}`}>
+                    <GraduationCapIcon size={30} className={isStudent ? 'text-[#9078e2]' : ''} />
                   </div>
-                  <span className={`font-medium ${isStudent ? 'text-blue-700' : ''}`}>Student</span>
+                  <span className={`font-medium ${isStudent ? 'text-[#9078e2]' : ''}`}>Student</span>
                 </motion.button>
               </div>
 
@@ -223,7 +223,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                 whileFocus={{ scale: 1.01 }}
                 required
               />
@@ -241,7 +241,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                 whileFocus={{ scale: 1.01 }}
                 required
               />
@@ -252,7 +252,7 @@ const Login = () => {
               <motion.button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm disabled:opacity-70"
+                className="w-full py-3 bg-[#9078e2] hover:bg-[#9078e2] text-white rounded-lg font-medium shadow-sm disabled:opacity-70"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >

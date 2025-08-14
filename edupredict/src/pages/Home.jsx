@@ -64,7 +64,7 @@ const Home = () => {
       <div className="text-center max-w-3xl mx-auto px-4">
         <motion.div variants={itemVariants}>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-6 text-white bg-clip-text gradient-bg">
-            Welcome to EduPredict
+            Welcome to EduNex-AI
           </h1>
         </motion.div>
 

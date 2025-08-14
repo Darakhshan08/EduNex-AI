@@ -11,6 +11,7 @@ import {
   const [showPredictionPopup, setShowPredictionPopup] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [sizeFilter, setSizeFilter] = useState('All Sizes')
+  const [fileName, setFileName] = useState("No file chosen");
   // Mock prediction result
   const predictionResult = {
     Model: 'Gradient Boosting',
@@ -20,6 +21,14 @@ import {
     'Max Dropout Risk': 1.99,
     'Confidence Score': 53.34,
   }
+
+
+
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setFileName(e.target.files[0].name);
+    }
+  };
   // Mock datasets for the table
   const datasets = [
     {
@@ -60,7 +69,7 @@ import {
     <div className="w-full min-h-screen bg-[#ffffff] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Upload New Dataset Section */}
-        <div className="bg-[#f5f5ff] rounded-xl p-6 sm:p-8 shadow-lg">
+        <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
             Upload New Dataset
           </h2>
@@ -68,21 +77,22 @@ import {
             Add new data sources and run predictions using your selected model.
           </p>
           <div className="space-y-6">
-            <div>
-              <label className="block text-gray-700 mb-2">
-                Dataset File (CSV)
-              </label>
-              <div className="relative">
-                <button className="bg-[#f8f8e0] border border-gray-300 rounded-md py-2 px-4 w-full text-left">
-                  Choose File{' '}
-                  <span className="text-gray-500 ml-2">No file chosen</span>
-                </button>
-              </div>
-            </div>
+          <div>
+      <label className="block text-gray-700 mb-2">
+       Upload File 
+      </label>
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+        className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100"
+      />
+     
+    </div>
             <div>
               <label className="block text-gray-700 mb-2">Choose Model</label>
               <div className="relative">
-                <select className="bg-[#f8f8e0] border border-gray-300 rounded-md py-2 px-4 w-full appearance-none">
+                <select className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none">
                   <option>XGBoost</option>
                   <option>Gradient Boosting</option>
                   <option>Random Forest</option>
@@ -105,7 +115,7 @@ import {
           </div>
         </div>
         {/* Manage Datasets Section */}
-        <div className="bg-[#f5f5ff] rounded-xl p-6 sm:p-8 shadow-lg">
+        <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
             Manage Datasets
           </h2>
@@ -120,14 +130,14 @@ import {
               <input
                 type="text"
                 placeholder="Search datasets..."
-                className="bg-[#f8f8e0] border border-gray-300 rounded-md py-2 pl-10 pr-4 w-full"
+                className="bg-white border border-gray-300 rounded-md py-2 pl-10 pr-4 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="relative min-w-[150px]">
               <select
-                className="bg-[#f8f8e0] border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
+                className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
                 value={sizeFilter}
                 onChange={(e) => setSizeFilter(e.target.value)}
               >

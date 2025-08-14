@@ -26,6 +26,7 @@ import {
   UserX,
   MegaphoneIcon,
   BellIcon,
+  File,
 } from "lucide-react";
 import Feedbackform from "./../pages/Feedbackform";
 import AnnounceForm from "../pages/AnnounceForm";
@@ -149,7 +150,7 @@ const Sidebar = () => {
                   exit={{ opacity: 0 }}
                   className="text-xl font-bold whitespace-pre text-white"
                 >
-                  EduPredict
+                  EduNex-AI
                 </motion.span>
               )}
             </AnimatePresence>
@@ -157,7 +158,7 @@ const Sidebar = () => {
 
           {/* Menu */}
           <motion.ul
-            className="whitespace-pre px-2.5 text-[0.9rem] py-2 flex flex-col gap-2 font-medium overflow-x-hidden md:h-[68%] h-[70%]"
+            className="whitespace-pre px-2.5 text-[0.9rem] py-2 flex flex-col gap-2 font-medium overflow-hidden "
             variants={containerVariants}
             initial="hidden"
             animate="show"
@@ -190,7 +191,12 @@ const Sidebar = () => {
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/attendance"
-                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
                   >
                     <LayoutDashboard size={26} />
                     Dashboard
@@ -199,7 +205,12 @@ const Sidebar = () => {
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/usermanagement"
-                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
                   >
                     <Users size={26} />
                     User Management
@@ -208,16 +219,26 @@ const Sidebar = () => {
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/dataset"
-                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
                   >
-                    <ChartColumnBig size={26} />
+                    <File size={26} />
                     {open && <span>Dataset</span>}
                   </NavLink>
                 </motion.li>
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/prediction"
-                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
                   >
                     <ChartColumnBig size={26} />
                     {open && <span>Prediction</span>}
@@ -227,7 +248,12 @@ const Sidebar = () => {
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/feedback"
-                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
                   >
                     <MessageSquare size={26} />
                     Feedback
@@ -259,7 +285,12 @@ const Sidebar = () => {
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/setting"
-                    className="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-gray-100"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
                   >
                     <Settings size={26} />
                     Settings

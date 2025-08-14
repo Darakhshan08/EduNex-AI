@@ -57,10 +57,20 @@ function Register() {
     }
   };
 
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 300, damping: 24 }
+    }
+  };
+
+
   return (
     <div className="flex w-full min-h-screen bg-gray-50">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-800 p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#9078e2] p-12 flex-col justify-between">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,7 +78,7 @@ function Register() {
           className="flex items-center"
         >
           <BookOpenIcon size={40} className="text-white" />
-          <span className="text-white text-3xl font-bold ml-2">EduPredict</span>
+          <span className="text-white text-3xl font-bold ml-2">EduNex AI</span>
         </motion.div>
 
         <motion.div
@@ -103,16 +113,20 @@ function Register() {
           </div>
         </motion.div>
 
-        <div className="text-white/60 text-sm">© 2025 EduPredict. All rights reserved.</div>
+        <div className="text-white/60 text-sm">© 2025 EduNex AI. All rights reserved.</div>
       </div>
 
       {/* Right Form Panel */}
-      <div className="w-full md:w-3/5 px-6 md:px-16 py-12 flex flex-col justify-center">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md mx-auto">
-          <div className="mb-10">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Sign Up</h2>
-            <p className="text-gray-600">Create your account to get started</p>
-          </div>
+        <motion.div className="text-center mb-8" variants={itemVariants}>
+            <div className="lg:hidden flex items-center justify-center mb-4">
+              <BookOpenIcon size={32} className="text-[#9078e2]" />
+              <span className="text-2xl font-bold ml-2 text-[#9078e2]">EduNex AI</span>
+            </div>
+            <h1 className="text-3xl font-extrabold text-gray-900">Sign Up</h1>
+            <p className="text-gray-600 mt-2">Create your account to get started</p>
+          </motion.div>
 
           {/* Toast Notifications */}
           <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
@@ -126,7 +140,7 @@ function Register() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
                 placeholder="Enter your full name"
                 required
               />
@@ -140,7 +154,7 @@ function Register() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
                 placeholder="Enter your email"
                 required
               />
@@ -154,7 +168,7 @@ function Register() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
                 placeholder="Create a password"
                 required
               />
@@ -169,7 +183,7 @@ function Register() {
                     key={roleOption}
                     className={`border rounded-lg p-4 flex flex-col items-center cursor-pointer transition-colors ${
                       formData.role === roleOption
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-[#9078e2] bg-[#f0ecfd]'
                         : 'border-gray-300 hover:border-blue-300'
                     }`}
                     onClick={() => setFormData({ ...formData, role: roleOption })}
@@ -192,7 +206,7 @@ function Register() {
                   name="student_id"
                   value={formData.student_id}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
                   placeholder="Enter your student ID"
                   required
                 />
@@ -200,14 +214,14 @@ function Register() {
             )}
             {formData.role === 'teacher' && (
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Courses You Teach</label>
+                <label className="block text-gray-700 font-medium mb-2">Course</label>
                 <input
                   type="text"
                   name="courses"
                   value={formData.courses}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                  placeholder="Math, Science, History"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
+                  placeholder="Course you teach"
                   required
                 />
               </div>
@@ -216,7 +230,7 @@ function Register() {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm disabled:opacity-70"
+              className="w-full py-3 bg-[#9078e2] hover:bg-[#9078e2] text-white rounded-lg font-medium shadow-sm disabled:opacity-70"
             >
               Create Account
             </button>

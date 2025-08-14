@@ -19,7 +19,7 @@ const GraphDropdown = ({ setOption }) => {
                     text-sm font-medium text-gray-700 hover:bg-gray-50 
                     focus:outline-none"
         >
-          Options
+          Select Month
         </button>
       </div>
 
@@ -32,32 +32,32 @@ const GraphDropdown = ({ setOption }) => {
         >
           <div className="py-1" role="none">
             <p
+              onClick={() => setOption(3)}
+              className="block px-4 py-2 text-sm text-gray-700
+                            hover:bg-gray-100 cursor-pointer"
+            >
+              3 months
+            </p>
+            <p
               onClick={() => setOption(7)}
               className="block px-4 py-2 text-sm text-gray-700
                             hover:bg-gray-100 cursor-pointer"
             >
-              7 days
+              7 months
             </p>
             <p
-              onClick={() => setOption(30)}
+              onClick={() => setOption(10)}
               className="block px-4 py-2 text-sm text-gray-700
                             hover:bg-gray-100 cursor-pointer"
             >
-              30 days
+              10 months
             </p>
             <p
-              onClick={() => setOption(60)}
-              className="block px-4 py-2 text-sm text-gray-700
-                            hover:bg-gray-100 cursor-pointer"
-            >
-              60 days
-            </p>
-            <p
-              onClick={() => setOption(90)}
+              onClick={() => setOption(12)}
               className="block px-4 py-2 text-sm text-gray-700
                             hover:bg-gray-100  cursor-pointer"
             >
-              90 days
+              12 months
             </p>
           </div>
         </div>

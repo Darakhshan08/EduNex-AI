@@ -16,7 +16,6 @@ import Register from "./pages/Register";
 import Dataset from "./pages/Dataset";
 import Setting from "./pages/Setting";
 import Feedback from "./pages/Feedback";
-import Prediction from "./pages/prediction";
 import StudentAttendance from "./pages/StudentAttendence";
 import Quiz from "./pages/Quiz";
 import FeedbackTeac from "./pages/FeedbackTeac";
@@ -27,6 +26,8 @@ import { ToastContainer } from "react-toastify";
 import StudentAnalysis from "./pages/StudentAnalysis";
 import StudentHistory from "./pages/StudentHistory";
 import Assignment from "./pages/Assignment";
+import Otpverify from "./pages/Otpverify";
+import Prediction from "./pages/Prediction";
 
 export function App() {
   // For demo purposes, we'll add state to toggle between user roles
@@ -54,6 +55,7 @@ export function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/otp" element={<Otpverify />} />
 
                 <Route
                   path="/attendance"
