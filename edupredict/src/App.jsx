@@ -28,6 +28,7 @@ import StudentHistory from "./pages/StudentHistory";
 import Assignment from "./pages/Assignment";
 import Otpverify from "./pages/Otpverify";
 import Prediction from "./pages/Prediction";
+import Index from "./pages/Index";
 
 export function App() {
   // For demo purposes, we'll add state to toggle between user roles
@@ -52,6 +53,7 @@ export function App() {
           <AnimatePresence mode="wait">
             <Layout>
               <Routes>
+                <Route path="/index" element={<Index />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
