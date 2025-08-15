@@ -5,7 +5,7 @@ import { perform_attendance_trend_analysis } from "../../Api/internal";
 import GraphDropdown from "../Graph/GraphDropDown";
 import Loader from "../Custom/Loader";
 
-const COLORS = ["#9078e2", "#ff7e67"];
+const COLORS = ["#9078e2","#ff7e67"];
 const CustomLegend = ({
   items
 }) => {
