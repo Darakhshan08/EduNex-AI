@@ -33,6 +33,37 @@ export const predictStudentPerformance = async (studentData) => {
   }
 }
 
+// Dataset Predict
+export const predictStudentDropout = async (file, modelName) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file); 
+    formData.append('model_name', modelName);
+
+    const response = await api.post('/predict_dropout', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error predicting student dropout:', error);
+    throw error;
+  }
+};
+
+export const uploadDataset = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api.post('/api/datasets/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const getDatasets = () => api.get('/api/datasets');
+export const deleteDatasetApi = (id) => api.delete(`/api/datasets/${id}`);
+export const downloadDatasetApi = (id) => api.get(`/api/datasets/${id}/download`, { responseType: 'blob' });
+
+
 export const fetch_attendance_table = async () => {
   let response;
   try {

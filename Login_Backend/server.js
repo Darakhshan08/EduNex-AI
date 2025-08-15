@@ -9,6 +9,7 @@ const { protect } = require("./middleware/authMiddleware");
 const Userroute = require("./routes/userRoutes");
 const feedbackRoutes = require("./routes/feedback");
 const studentroute = require("./routes/studentRoutes");
+const { default: datasetRoutes } = require("./routes/datasetRoutes");
 
 
 const app = express();
@@ -33,6 +34,8 @@ app.use('/api/student', studentroute)
 app.use('/api/user', Userroute);
 app.use("/api/auth", authroutes);
 app.use("/api/feedback", feedbackRoutes); // ⬅️ Mount route
+// Routes
+app.use('/api/datasets', datasetRoutes);
 
 app.get("/api/admin", protect(["admin"]), (req, res) => {
   res.json({ msg: "Welcome Admin" });

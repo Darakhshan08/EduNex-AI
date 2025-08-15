@@ -7,28 +7,51 @@ import {
   DownloadIcon,
   TrashIcon,
 } from 'lucide-react'
+
+
+import { predictStudentDropout } from '../Api/internal'; // function import
  function Dataset() {
   const [showPredictionPopup, setShowPredictionPopup] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [sizeFilter, setSizeFilter] = useState('All Sizes')
   const [fileName, setFileName] = useState("No file chosen");
-  // Mock prediction result
-  const predictionResult = {
-    Model: 'Gradient Boosting',
-    'Mean Dropout Risk': 0.87,
-    'Std Deviation': 0.56,
-    'Min Dropout Risk': -0.08,
-    'Max Dropout Risk': 1.99,
-    'Confidence Score': 53.34,
-  }
 
 
+  const [predictionResult, setPredictionResult] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedModel, setSelectedModel] = useState('XGBoost');
 
+
+   // File change handler
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
-      setFileName(e.target.files[0].name);
+      setSelectedFile(e.target.files[0]);
     }
   };
+
+  // Predict button click
+  const handlePredict = async () => {
+    if (!selectedFile) {
+      alert('Please upload a CSV file.');
+      return;
+    }
+
+    try {
+      const result = await predictStudentDropout(selectedFile, selectedModel);
+      setPredictionResult(result);
+      setShowPredictionPopup(true);
+    } catch (error) {
+      alert('Error while predicting dropout risk.');
+    }
+  };
+
+
+
+  // const handleFileChange = (e) => {
+  //   if (e.target.files.length > 0) {
+  //     setFileName(e.target.files[0].name);
+  //   }
+  // };
   // Mock datasets for the table
   const datasets = [
     {
@@ -69,51 +92,57 @@ import {
     <div className="w-full min-h-screen bg-[#ffffff] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Upload New Dataset Section */}
-        <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
-          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
-            Upload New Dataset
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Add new data sources and run predictions using your selected model.
-          </p>
-          <div className="space-y-6">
-          <div>
-      <label className="block text-gray-700 mb-2">
-       Upload File 
-      </label>
-      <input
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100"
-      />
-     
-    </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Choose Model</label>
-              <div className="relative">
-                <select className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none">
-                  <option>XGBoost</option>
-                  <option>Gradient Boosting</option>
-                  <option>Random Forest</option>
-                  <option>Neural Network</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDownIcon size={18} className="text-gray-500" />
-                </div>
-              </div>
-            </div>
-            <div>
-              <button
-                className="bg-[#c8c8ff] hover:bg-[#b8b8ff] text-gray-700 py-2 px-6 rounded-md flex items-center"
-                onClick={() => setShowPredictionPopup(true)}
-              >
-                <BarChart2Icon size={18} className="mr-2" />
-                Predict
-              </button>
+       <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
+        Upload New Dataset
+      </h2>
+      <p className="text-gray-600 mb-6">
+        Add new data sources and run predictions using your selected model.
+      </p>
+      <div className="space-y-6">
+        {/* File upload */}
+        <div>
+          <label className="block text-gray-700 mb-2">Upload File</label>
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100"
+          />
+        </div>
+
+        {/* Model selection */}
+        <div>
+          <label className="block text-gray-700 mb-2">Choose Model</label>
+          <div className="relative">
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
+            >
+              <option>XGBoost</option>
+              <option>Gradient Boosting</option>
+              <option>Random Forest</option>
+              <option>Linear Regression</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <ChevronDownIcon size={18} className="text-gray-500" />
             </div>
           </div>
         </div>
+
+        {/* Predict button */}
+        <div>
+          <button
+            className="bg-[#9078e2]  text-white py-2 px-6 rounded-md flex items-center"
+            onClick={handlePredict}
+          >
+            <BarChart2Icon size={18} className="mr-2" />
+            Predict
+          </button>
+        </div>
+      </div>
+      </div>
         {/* Manage Datasets Section */}
         <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
@@ -221,7 +250,8 @@ import {
         </div>
       </div>
       {/* Prediction Results Popup */}
-      {showPredictionPopup && (
+     
+      {showPredictionPopup && predictionResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="flex justify-between items-center border-b p-4">
@@ -238,29 +268,35 @@ import {
             <div className="p-6">
               <table className="w-full">
                 <tbody>
-                  {Object.entries(predictionResult).map(
-                    ([key, value], index) => (
-                      <tr
-                        key={index}
-                        className={index % 2 === 0 ? 'bg-gray-50' : ''}
-                      >
-                        <td className="py-2 px-3 text-sm font-medium text-gray-700">
-                          {key}
-                        </td>
-                        <td className="py-2 px-3 text-sm text-gray-900 text-right">
-                          {typeof value === 'number' ? value.toFixed(2) : value}
-                        </td>
-                      </tr>
-                    ),
-                  )}
+                  {Object.entries(predictionResult).map(([key, value], index) => (
+                    <tr
+                      key={index}
+                      className={index % 2 === 0 ? 'bg-gray-50' : ''}
+                    >
+                      <td className="py-2 px-3 text-sm font-medium text-gray-700">
+                        {key}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-gray-900 text-right">
+                        {typeof value === 'number'
+                          ? value.toFixed(2)
+                          : value}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end gap-x-2">
                 <button
                   onClick={() => setShowPredictionPopup(false)}
-                  className="bg-[#c8c8ff] hover:bg-[#b8b8ff] text-gray-700 py-2 px-6 rounded-md"
+                  className="bg-[#c8c8ff]  text-white py-2 px-6 rounded-md"
                 >
                   Close
+                </button>
+                <button
+                  onClick={() => setShowPredictionPopup(false)}
+                  className="bg-[#9078e2]  text-white py-2 px-4 rounded-md"
+                >
+                  Confirm & Upload
                 </button>
               </div>
             </div>
