@@ -29,6 +29,7 @@ import Assignment from "./pages/Assignment";
 import Otpverify from "./pages/Otpverify";
 import Prediction from "./pages/Prediction";
 import Index from "./pages/Index";
+import Guestlayout from "./components/Custom/GuestLayout";
 
 export function App() {
   // For demo purposes, we'll add state to toggle between user roles
@@ -51,9 +52,9 @@ export function App() {
         <ToastContainer position="top-right" autoClose={3000} />
         <div className="flex flex-col h-screen">
           <AnimatePresence mode="wait">
-            <Layout>
+            
               <Routes>
-                <Route path="/index" element={<Index />} />
+                <Route path="/index" element={<Guestlayout><Index /></Guestlayout>} />
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -243,7 +244,7 @@ export function App() {
                   }
                 />
               </Routes>
-            </Layout>
+            
           </AnimatePresence>
         </div>
       </BrowserRouter>
