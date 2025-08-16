@@ -1,14 +1,14 @@
 const express = require("express");
 
+const { deleteDataset, downloadDataset, listDatasets, uploadDataset } = require("../controllers/datasetController");
+const { upload } = require("../middleware/upload");
 
-import { deleteDataset, downloadDataset, listDatasets, uploadDataset } from '../controllers/datasetController.js';
-import upload from '../middleware/upload.js';
 
-const datasetRoutes = express.Router()
+const datasetRoutes = express.Router();
 
 datasetRoutes.post('/upload', upload.single('file'), uploadDataset);
 datasetRoutes.get('/', listDatasets);
 datasetRoutes.delete('/:id', deleteDataset);
 datasetRoutes.get('/:id/download', downloadDataset);
 
-export default datasetRoutes;
+module.exports = datasetRoutes;

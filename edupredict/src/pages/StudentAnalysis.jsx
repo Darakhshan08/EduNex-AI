@@ -9,12 +9,12 @@ const StudentAnalysis = () => {
   const [error, setError] = useState(null);
   return (
     <div className="w-full">
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
           Back to Dashboard
         </Link>
-      </div>
+      </div> */}
       <h1 className="text-2xl font-bold mb-6">Student Performance Analysis</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-5 rounded-lg shadow-md">

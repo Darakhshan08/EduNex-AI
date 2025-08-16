@@ -7,7 +7,7 @@ const AuthLayout = ({ token, children }) => {
 
   if (auth) {
     return (
-      <div className="flex flex-col md:flex-row h-screen bg-gray-50">
+      <div className="flex flex-col md:flex-row h-screen bg-[#f1eff9]">
         <Sidebar /> {/* Sidebar left side */}
         <motion.main initial={{
       opacity: 0

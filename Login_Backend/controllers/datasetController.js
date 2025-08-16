@@ -1,30 +1,35 @@
+const {bytesToReadable, sizeBucket } = require("../utils/bytesToReadable");
+const Dataset = require('../model/Dataset.js');
 
-import Dataset from '../model/Dataset.js';
-import { bytesToReadable, sizeBucket } from '../utils/bytesToReadable.js';
 
 // POST /api/datasets/upload
-export const uploadDataset = async (req, res) => {
+exports.uploadDataset = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'CSV file is required' });
+    if (!req.file) {
+      return res.status(400).json({ error: "CSV file is required" });
+    }
 
     const { originalname, size, buffer } = req.file;
 
     const doc = await Dataset.create({
       name: originalname,
-      sizeLabel: bytesToReadable(size),
+      sizeLabel: bytesToReadable(size), // ✅ converted size
       sizeBytes: size,
       fileData: buffer,
     });
 
-    return res.json({ message: 'File uploaded successfully', dataset: doc });
+    return res.json({
+      message: "File uploaded successfully",
+      dataset: doc,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Upload failed' });
+    console.error("Upload error:", err);
+    return res.status(500).json({ error: "Upload failed" });
   }
 };
 
 // GET /api/datasets
-export const listDatasets = async (req, res) => {
+exports.listDatasets = async (req, res) => {
   try {
     const { size } = req.query; // optional filter by bucket
 
@@ -50,7 +55,7 @@ export const listDatasets = async (req, res) => {
 };
 
 // DELETE /api/datasets/:id
-export const deleteDataset = async (req, res) => {
+exports.deleteDataset = async (req, res) => {
   try {
     const { id } = req.params;
     const found = await Dataset.findById(id);
@@ -65,7 +70,7 @@ export const deleteDataset = async (req, res) => {
 };
 
 // GET /api/datasets/:id/download
-export const downloadDataset = async (req, res) => {
+exports.downloadDataset = async (req, res) => {
   try {
     const { id } = req.params;
     const found = await Dataset.findById(id);

@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const DatasetSchema = new mongoose.Schema(
+const DatasetSchema = new Schema(
   {
     name: { type: String, required: true },
     sizeLabel: { type: String, required: true }, // e.g., "1.23 MB"
@@ -16,4 +17,5 @@ DatasetSchema.virtual('date').get(function () {
   return this.createdAt;
 });
 
-export default mongoose.model('Dataset', DatasetSchema);
+const Dataset = mongoose.model("Dataset", DatasetSchema);
+module.exports = Dataset;

@@ -140,7 +140,7 @@ function Register() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
                 placeholder="Enter your full name"
                 required
               />
@@ -154,7 +154,7 @@ function Register() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
                 placeholder="Enter your email"
                 required
               />
@@ -168,7 +168,7 @@ function Register() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
                 placeholder="Create a password"
                 required
               />
@@ -206,7 +206,7 @@ function Register() {
                   name="student_id"
                   value={formData.student_id}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
                   placeholder="Enter your student ID"
                   required
                 />
@@ -220,7 +220,7 @@ function Register() {
                   name="courses"
                   value={formData.courses}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2]"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
                   placeholder="Course you teach"
                   required
                 />

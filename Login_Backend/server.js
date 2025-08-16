@@ -9,7 +9,8 @@ const { protect } = require("./middleware/authMiddleware");
 const Userroute = require("./routes/userRoutes");
 const feedbackRoutes = require("./routes/feedback");
 const studentroute = require("./routes/studentRoutes");
-const { default: datasetRoutes } = require("./routes/datasetRoutes");
+const datasetRoutes = require("./routes/datasetRoutes");
+
 
 
 const app = express();

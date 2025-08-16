@@ -236,7 +236,7 @@ const Setting = () => {
               <button
                 type="button"
                 onClick={handleChangePassword}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                className="px-6 py-2.5 bg-[#9078e2] hover:bg-[#9078e2] text-white font-medium rounded-lg"
               >
                 Update Password
               </button>

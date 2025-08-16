@@ -59,7 +59,7 @@ const saveToHistory = (studentData, prediction) => {
   return (
     <div>
       <div className="flex items-center mb-6">
-        <BookOpenIcon className="mr-2 text-blue-600" />
+        <BookOpenIcon className="mr-2 text-[#9078e2]" />
         <h2 className="text-xl font-semibold">Student Information</h2>
       </div>
       <form onSubmit={handleSubmit}>
@@ -74,7 +74,7 @@ const saveToHistory = (studentData, prediction) => {
               value={formData.student_id}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -87,10 +87,10 @@ const saveToHistory = (studentData, prediction) => {
               value={formData.student_name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Attendance Rate
             </label>
@@ -105,7 +105,7 @@ const saveToHistory = (studentData, prediction) => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
+          </div> */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               GPA
@@ -119,7 +119,7 @@ const saveToHistory = (studentData, prediction) => {
               max="4"
               step="0.01"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -134,7 +134,7 @@ const saveToHistory = (studentData, prediction) => {
               min="0"
               step="0.5"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -148,7 +148,7 @@ const saveToHistory = (studentData, prediction) => {
               onChange={handleChange}
               min="0"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -164,7 +164,7 @@ const saveToHistory = (studentData, prediction) => {
               max="100"
               step="0.01"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -178,7 +178,7 @@ const saveToHistory = (studentData, prediction) => {
               onChange={handleChange}
               min="0"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -192,7 +192,7 @@ const saveToHistory = (studentData, prediction) => {
               onChange={handleChange}
               min="0"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
           <div>
@@ -208,14 +208,14 @@ const saveToHistory = (studentData, prediction) => {
               max="100"
               step="0.01"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
         </div>
         <div className="mt-6">
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            className="w-full bg-[#9078e2] hover:bg-[#9078e2] text-white font-medium py-2 px-4 rounded-md transition-colors"
           >
             Predict Performance
           </button>

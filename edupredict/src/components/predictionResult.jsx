@@ -49,7 +49,7 @@ export const PredictionResult = ({ prediction, loading, error }) => {
   return (
     <div>
       <div className="flex items-center mb-6">
-        <BarChart2Icon className="mr-2 text-blue-600" />
+        <BarChart2Icon className="mr-2 text-[#9078e2]" />
         <h2 className="text-xl font-semibold">Prediction Results</h2>
       </div>
       {loading && (
@@ -101,7 +101,7 @@ export const PredictionResult = ({ prediction, loading, error }) => {
                     </span>
                   </dd>
                 </div>
-                <div className="px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-b border-gray-200">
+                {/* <div className="px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-b border-gray-200">
                   <dt className="text-sm font-medium text-gray-500">
                     Course Demand
                   </dt>
@@ -112,7 +112,7 @@ export const PredictionResult = ({ prediction, loading, error }) => {
                       {prediction.course_demand}
                     </span>
                   </dd>
-                </div>
+                </div> */}
                 <div className="px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">
                     Predicted Performance
@@ -128,16 +128,16 @@ export const PredictionResult = ({ prediction, loading, error }) => {
               </dl>
             </div>
           </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <div className="bg-[#f0ecfd] border border-[#9078e2] rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
-                <TrendingUpIcon className="h-5 w-5 text-blue-400" />
+                <TrendingUpIcon className="h-5 w-5 text-[#9078e2]" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">
+                <h3 className="text-sm font-medium text-black">
                   Recommendation
                 </h3>
-                <div className="mt-2 text-sm text-blue-700">
+                <div className="mt-2 text-sm text-black">
                   <p>
                     {prediction.dropout_risk === 'High'
                       ? 'This student has a high risk of dropping out. Consider immediate intervention and support.'
