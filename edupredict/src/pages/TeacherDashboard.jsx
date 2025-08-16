@@ -10,6 +10,53 @@ const TeacherDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [recentAnalyses, setRecentAnalyses] = useState([]);
 
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    role: ''
+  });
+
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  }
+  
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem('admin');
+    const teacherToken = localStorage.getItem('teacher');
+    const studentToken = localStorage.getItem('student');
+  
+    const token = adminToken || teacherToken || studentToken;
+  
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded) {
+        setUserData({
+          name: decoded.name || '',
+          email: decoded.email || '',
+          username: decoded.username || '',
+          role: decoded.role || ''
+        });
+      }
+    }
+  }, []);
+
+
+
+
   // Load recent analyses from localStorage
   useEffect(() => {
     const history = JSON.parse(localStorage.getItem('studentHistory') || '[]');
@@ -62,10 +109,29 @@ const TeacherDashboard = () => {
 
   return (
     <motion.div className="p-4" variants={containerVariants} initial="hidden" animate="visible">
-      <motion.div className="mb-6" variants={itemVariants}>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Teacher Dashboard</h1>
-        <p className="text-gray-600">Track and Analyze your Student and Course records</p>
-      </motion.div>
+
+<motion.div
+  variants={itemVariants}
+  className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-indigo-50 to-white shadow-sm border border-gray-100"
+>
+  <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+    Welcome,{" "}
+    <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+      {userData.name}
+    </span>{" "}
+    👋
+  </h1>
+
+  <p className="text-gray-600 text-lg leading-relaxed">
+    👩‍🏫 Manage <span className="font-semibold text-purple-600">students</span>,  
+    track <span className="font-semibold text-pink-600">courses</span>,  
+    and gain insights to boost academic success 🚀
+  </p>
+</motion.div>
+
+
+
+      
 
       <TeacherTop data={courseData.summary_metrics} />
 

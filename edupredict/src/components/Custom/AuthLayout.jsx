@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { motion } from 'framer-motion';
+import Chatbot from "../../pages/Chatbox";
 const AuthLayout = ({ token, children }) => {
   const auth = localStorage.getItem(token);
 
@@ -17,6 +18,9 @@ const AuthLayout = ({ token, children }) => {
       duration: 0.3
     }} className="flex-1 p-4 md:p-6 overflow-auto">
         {children}
+
+        <Chatbot />
+
       </motion.main>
       </div>
     );

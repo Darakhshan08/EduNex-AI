@@ -78,6 +78,7 @@
 
     const filteredItems = feedbackItems.filter((item) => {
         return roleFilter === "All" || item.role === roleFilter;
+        
     });
     return (
         <div className="flex w-full min-h-screen justify-center items-center p-4">
@@ -85,7 +86,7 @@
             <div className="flex justify-between items-center mb-6">
             <div className="flex items-start gap-3">
                 <div className="p-1.5 bg-purple-100 rounded-lg">
-                <MessageSquareIcon className="text-purple-600 w-6 h-6" />
+                <MessageSquareIcon className="text-[#9078e2] w-6 h-6" />
                 </div>
                 <div>
                 <h1 className="text-3xl font-bold text-gray-800">
@@ -101,11 +102,11 @@
                 <select
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
-                    className="appearance-none bg-[#fafaea] text-gray-700 py-2 px-4 pr-8 rounded-lg border border-gray-200 focus:outline-none"
+                    className="appearance-none bg-white text-gray-700 py-2 px-4 pr-8 rounded-lg border border-gray-200 focus:outline-none"
                 >
                     <option>All</option>
-                    <option>Teacher</option>
-                    <option>Student</option>
+                    <option>teacher</option>
+                    <option>student</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg
@@ -118,7 +119,7 @@
                 </div>
                 </div>
                 <button
-                className="bg-[#4f46e5] hover:bg-purple-500 text-white py-2 px-5 rounded-xl flex items-center gap-2"
+                className="bg-[#9078e2] hover:bg-[#9078e2] text-white py-2 px-5 rounded-xl flex items-center gap-2"
                 onClick={() => setIsModalOpen(true)}
                 >
                 <Send className="w-4 h-4" />
@@ -136,9 +137,9 @@
                     <div className="flex items-center gap-3 mb-2">
                         <span
                         className={`${
-                            item.role === "Teacher"
-                            ? "bg-blue-200 text-blue-800"
-                            : "bg-green-200 text-green-800"
+                            item.role === "teacher"
+                            ? "bg-[#d1cae5] text-black"
+                            : "bg-green-200 text-black"
                         } text-md px-3 py-1 rounded-full`}
                         >
                         {item.role}
@@ -162,18 +163,7 @@
                     )}
                     </div>
                     <div className="flex gap-3">
-                    {item.viewed ? (
-                        <button className="text-gray-400 hover:text-gray-600">
-                        <Eye className="w-5 h-5" />
-                        </button>
-                    ) : (
-                        <button
-                        className="text-blue-500 hover:text-gray-600"
-                        onClick={() => handleView(item.id)}
-                        >
-                        <Eye className="w-5 h-5" />
-                        </button>
-                    )}
+                  
                     <button
                         className="text-gray-400 hover:text-red-600"
                         onClick={() => handleDelete(item.id)}

@@ -24,11 +24,52 @@ const Attendance = () => {
   const [data, setData] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    role: ''
+  });
   const [totalTeachers, setTotalTeachers] = useState(0);
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalCourses, setTotalCourses] = useState(0);
 
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  }
+  
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem('admin');
+    const teacherToken = localStorage.getItem('teacher');
+    const studentToken = localStorage.getItem('student');
+  
+    const token = adminToken || teacherToken || studentToken;
+  
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded) {
+        setUserData({
+          name: decoded.name || '',
+          email: decoded.email || '',
+          username: decoded.username || '',
+          role: decoded.role || ''
+        });
+      }
+    }
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -195,14 +236,24 @@ const Attendance = () => {
       animate="visible"
       className="px-2"
     >
-      <motion.div className="mb-6" variants={itemVariants}>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">
-          Admin Dashboard
-        </h1>
-        <p className="text-gray-600">
-        📊 Easily track and monitor student attendance to ensure academic engagement.
-        </p>
-      </motion.div>
+     <motion.div
+  className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-indigo-50 to-white shadow-sm border border-gray-100"
+  variants={itemVariants}
+>
+  <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+    Welcome,{" "}
+    <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+      {userData.name}
+    </span>{" "}
+    👋
+  </h1>
+
+  <p className="text-gray-600 text-lg leading-relaxed">
+    📊 Track your <span className="font-semibold text-indigo-600">attendance </span>  
+     and stay on top of your academic journey 🚀
+  </p>
+</motion.div>
+
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6"
         initial="hidden"

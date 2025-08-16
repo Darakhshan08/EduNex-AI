@@ -1,7 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const PORT = 8000;
-
 const connectDB = require("./config/dbconnect");
 const seedAdmin = require("./seeders/adminSeeder");
 const authroutes = require("./routes/authRoutes");
@@ -10,8 +8,11 @@ const Userroute = require("./routes/userRoutes");
 const feedbackRoutes = require("./routes/feedback");
 const studentroute = require("./routes/studentRoutes");
 const datasetRoutes = require("./routes/datasetRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const bodyParser = require("body-parser");
 
 
+require("dotenv").config();
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use(cors());
 
 app.use(express.json());
 
+
+app.use("/api/chat", chatRoutes);
+
 app.use('/api/student', studentroute)
 app.use('/api/user', Userroute);
 app.use("/api/auth", authroutes);
@@ -49,6 +53,8 @@ app.get("/api/teacher", protect(["teacher"]), (req, res) => {
 });
 
 connectDB().then(() => {
-  app.listen(PORT, console.log(`Backend is running on the ${PORT}`));
+  app.listen(process.env.PORT, function () {
+    console.log(`Server Started Running on PORT ${process.env.PORT}!`)
+  });
 });
 
