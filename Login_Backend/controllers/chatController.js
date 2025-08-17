@@ -1,11 +1,11 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import dotenv from "dotenv";
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const dotenv =require("dotenv");
 
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
-export const chatWithGemini = async (req, res) => {
+exports.chatWithGemini = async (req, res) => {
   const { message } = req.body;
 
   if (!message) return res.status(400).json({ error: "Message is required" });

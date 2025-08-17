@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   ChevronDownIcon,
   SearchIcon,
@@ -8,141 +8,193 @@ import {
   TrashIcon,
 } from 'lucide-react'
 
+import {
+  
+  uploadDataset,
+  getDatasets,
+  deleteDatasetApi,
+  downloadDatasetApi,
+  triggerBlobDownload,
+} from '../Api/dataset'
+import { predictStudentDropout } from '../Api/internal'
 
-import { predictStudentDropout } from '../Api/internal'; // function import
- function Dataset() {
+
+function Dataset() {
   const [showPredictionPopup, setShowPredictionPopup] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [sizeFilter, setSizeFilter] = useState('All Sizes')
-  const [fileName, setFileName] = useState("No file chosen");
+  const [predictionResult, setPredictionResult] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [selectedModel, setSelectedModel] = useState('XGBoost')
+  const [datasets, setDatasets] = useState([])
+  const [loadingList, setLoadingList] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [predicting, setPredicting] = useState(false)
 
+  // Map UI filter -> backend query param
+  const sizeParamMap = useMemo(() => ({
+    'All Sizes': undefined,
+    'Small (<1MB)': 'small',
+    'Medium (1-3MB)': 'medium',
+    'Large (>3MB)': 'large',
+  }), [])
 
-  const [predictionResult, setPredictionResult] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedModel, setSelectedModel] = useState('XGBoost');
+  // Initial + whenever sizeFilter changes, fetch from backend
+  useEffect(() => {
+    const run = async () => {
+      setLoadingList(true)
+      try {
+        const sizeParam = sizeParamMap[sizeFilter]
+        const data = await getDatasets(sizeParam) // server-side filtering
+        setDatasets(data)
+      } catch (e) {
+        console.error('Error fetching datasets:', e)
+      } finally {
+        setLoadingList(false)
+      }
+    }
+    run()
+  }, [sizeFilter, sizeParamMap])
 
-
-   // File change handler
+  // File change handler
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      setSelectedFile(e.target.files[0])
     }
-  };
+  }
 
   // Predict button click
   const handlePredict = async () => {
     if (!selectedFile) {
-      alert('Please upload a CSV file.');
-      return;
+      alert('Please upload a CSV file.')
+      return
     }
-
+    setPredicting(true)
     try {
-      const result = await predictStudentDropout(selectedFile, selectedModel);
-      setPredictionResult(result);
-      setShowPredictionPopup(true);
+      const result = await predictStudentDropout(selectedFile, selectedModel)
+      setPredictionResult(result)
+      setShowPredictionPopup(true)
     } catch (error) {
-      alert('Error while predicting dropout risk.');
+      console.error(error)
+      alert('Error while predicting dropout risk.')
+    } finally {
+      setPredicting(false)
     }
-  };
+  }
 
+  // Confirm & Upload => Save file to MongoDB and refresh list
+  const handleConfirmUpload = async () => {
+    if (!selectedFile) {
+      alert('Please select a CSV file first.')
+      return
+    }
+    setUploading(true)
+    try {
+      await uploadDataset(selectedFile)
+      // Refresh list after upload (respect current size filter)
+      const sizeParam = sizeParamMap[sizeFilter]
+      const refreshed = await getDatasets(sizeParam)
+      setDatasets(refreshed)
+      setShowPredictionPopup(false)
+      setPredictionResult(null)
+      setSelectedFile(null)
+    } catch (err) {
+      console.error(err)
+      alert('Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
+  // Delete dataset
+  const handleDelete = async (id) => {
+    try {
+      await deleteDatasetApi(id)
+      const sizeParam = sizeParamMap[sizeFilter]
+      const refreshed = await getDatasets(sizeParam)
+      setDatasets(refreshed)
+    } catch (e) {
+      console.error(e)
+      alert('Delete failed.')
+    }
+  }
 
-  // const handleFileChange = (e) => {
-  //   if (e.target.files.length > 0) {
-  //     setFileName(e.target.files[0].name);
-  //   }
-  // };
-  // Mock datasets for the table
-  const datasets = [
-    {
-      id: 1,
-      name: 'Student Performance 2023',
-      size: '1.2 MB',
-      date: '2023-10-15',
-      status: 'Processed',
-    },
-    {
-      id: 2,
-      name: 'Enrollment Data Q3',
-      size: '3.5 MB',
-      date: '2023-09-22',
-      status: 'Processing',
-    },
-    {
-      id: 3,
-      name: 'Faculty Survey Results',
-      size: '0.8 MB',
-      date: '2023-08-30',
-      status: 'Processed',
-    },
-    {
-      id: 4,
-      name: 'Course Completion Stats',
-      size: '2.1 MB',
-      date: '2023-07-12',
-      status: 'Failed',
-    },
-  ]
-  const filteredDatasets = datasets.filter(
-    (dataset) =>
-      dataset.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (sizeFilter === 'All Sizes' || dataset.size.includes(sizeFilter)),
-  )
+  // Download dataset
+  const handleDownload = async (dataset) => {
+    try {
+      const res = await downloadDatasetApi(dataset._id)
+      triggerBlobDownload(res.data, dataset.name || `dataset_${dataset._id}.csv`, res.headers)
+    } catch (e) {
+      console.error(e)
+      alert('Download failed.')
+    }
+  }
+
+  // Client-side search filter
+  const filteredDatasets = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    if (!term) return datasets
+    return datasets.filter((d) => (d.name || '').toLowerCase().includes(term))
+  }, [datasets, searchTerm])
+
   return (
     <div className="w-full min-h-screen bg-[#ffffff] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Upload New Dataset Section */}
-       <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
-      <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
-        Upload New Dataset
-      </h2>
-      <p className="text-gray-600 mb-6">
-        Add new data sources and run predictions using your selected model.
-      </p>
-      <div className="space-y-6">
-        {/* File upload */}
-        <div>
-          <label className="block text-gray-700 mb-2">Upload File</label>
-          <input
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-            className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100"
-          />
-        </div>
+        <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
+            Upload New Dataset
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Add new data sources and run predictions using your selected model.
+          </p>
 
-        {/* Model selection */}
-        <div>
-          <label className="block text-gray-700 mb-2">Choose Model</label>
-          <div className="relative">
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
-            >
-              <option>XGBoost</option>
-              <option>Gradient Boosting</option>
-              <option>Random Forest</option>
-              <option>Linear Regression</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <ChevronDownIcon size={18} className="text-gray-500" />
+          <div className="space-y-6">
+            {/* File upload */}
+            <div>
+              <label className="block text-gray-700 mb-2">Upload File</label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100"
+              />
+            </div>
+
+            {/* Model selection */}
+            <div>
+              <label className="block text-gray-700 mb-2">Choose Model</label>
+              <div className="relative">
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
+                >
+                  <option>XGBoost</option>
+                  <option>Gradient Boosting</option>
+                  <option>Random Forest</option>
+                  <option>Linear Regression</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <ChevronDownIcon size={18} className="text-gray-500" />
+                </div>
+              </div>
+            </div>
+
+            {/* Predict button */}
+            <div>
+              <button
+                className="bg-[#9078e2] text-white py-2 px-6 rounded-md flex items-center disabled:opacity-60"
+                onClick={handlePredict}
+                disabled={predicting}
+              >
+                <BarChart2Icon size={18} className="mr-2" />
+                {predicting ? 'Predicting…' : 'Predict'}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Predict button */}
-        <div>
-          <button
-            className="bg-[#9078e2]  text-white py-2 px-6 rounded-md flex items-center"
-            onClick={handlePredict}
-          >
-            <BarChart2Icon size={18} className="mr-2" />
-            Predict
-          </button>
-        </div>
-      </div>
-      </div>
         {/* Manage Datasets Section */}
         <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
@@ -151,6 +203,7 @@ import { predictStudentDropout } from '../Api/internal'; // function import
           <p className="text-gray-600 mb-6">
             View, download, or delete existing datasets.
           </p>
+
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-grow">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -164,7 +217,8 @@ import { predictStudentDropout } from '../Api/internal'; // function import
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="relative min-w-[150px]">
+
+            <div className="relative min-w-[210px]">
               <select
                 className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
                 value={sizeFilter}
@@ -180,54 +234,50 @@ import { predictStudentDropout } from '../Api/internal'; // function import
               </div>
             </div>
           </div>
+
           {/* Datasets Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white rounded-lg overflow-hidden">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                    Dataset Name
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                    Size
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                    Date Added
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                    Status
-                  </th>
-                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                    Actions
-                  </th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">Dataset Name</th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">Size</th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">Date Added</th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-600">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredDatasets.length > 0 ? (
+                {loadingList ? (
+                  <tr>
+                    <td colSpan={4} className="py-6 px-4 text-center text-gray-500">Loading…</td>
+                  </tr>
+                ) : filteredDatasets.length > 0 ? (
                   filteredDatasets.map((dataset) => (
-                    <tr key={dataset.id}>
-                      <td className="py-3 px-4 text-sm text-gray-800">
-                        {dataset.name}
+                    <tr key={dataset._id}>
+                      <td className="py-3 px-4 text-sm text-gray-800">{dataset.name}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        {dataset.sizeLabel}
+                        {dataset.sizeBucket ? ` — ${dataset.sizeBucket}` : ''}
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-600">
-                        {dataset.size}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
-                        {dataset.date}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        <span
-                          className={`inline-block px-2 py-1 rounded-full text-xs ${dataset.status === 'Processed' ? 'bg-green-100 text-green-800' : dataset.status === 'Processing' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}
-                        >
-                          {dataset.status}
-                        </span>
+                        {dataset.createdAt
+                          ? new Date(dataset.createdAt).toLocaleDateString()
+                          : new Date(dataset.date).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 text-sm">
                         <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-800">
+                          <button
+                            onClick={() => handleDownload(dataset)}
+                            className="text-blue-600 hover:text-blue-800"
+                            title="Download"
+                          >
                             <DownloadIcon size={16} />
                           </button>
-                          <button className="text-red-600 hover:text-red-800">
+                          <button
+                            onClick={() => handleDelete(dataset._id)}
+                            className="text-red-600 hover:text-red-800"
+                            title="Delete"
+                          >
                             <TrashIcon size={16} />
                           </button>
                         </div>
@@ -236,10 +286,7 @@ import { predictStudentDropout } from '../Api/internal'; // function import
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="py-4 px-4 text-center text-gray-500"
-                    >
+                    <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
                       No datasets found
                     </td>
                   </tr>
@@ -249,8 +296,8 @@ import { predictStudentDropout } from '../Api/internal'; // function import
           </div>
         </div>
       </div>
+
       {/* Prediction Results Popup */}
-     
       {showPredictionPopup && predictionResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
@@ -265,6 +312,7 @@ import { predictStudentDropout } from '../Api/internal'; // function import
                 <XIcon size={20} />
               </button>
             </div>
+
             <div className="p-6">
               <table className="w-full">
                 <tbody>
@@ -277,26 +325,26 @@ import { predictStudentDropout } from '../Api/internal'; // function import
                         {key}
                       </td>
                       <td className="py-2 px-3 text-sm text-gray-900 text-right">
-                        {typeof value === 'number'
-                          ? value.toFixed(2)
-                          : value}
+                        {typeof value === 'number' ? value.toFixed(2) : value}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+
               <div className="mt-6 flex justify-end gap-x-2">
                 <button
                   onClick={() => setShowPredictionPopup(false)}
-                  className="bg-[#c8c8ff]  text-white py-2 px-6 rounded-md"
+                  className="bg-[#c8c8ff] text-white py-2 px-6 rounded-md"
                 >
                   Close
                 </button>
                 <button
-                  onClick={() => setShowPredictionPopup(false)}
-                  className="bg-[#9078e2]  text-white py-2 px-4 rounded-md"
+                  onClick={handleConfirmUpload}
+                  className="bg-[#9078e2] text-white py-2 px-4 rounded-md disabled:opacity-60"
+                  disabled={uploading}
                 >
-                  Confirm & Upload
+                  {uploading ? 'Uploading…' : 'Confirm & Upload'}
                 </button>
               </div>
             </div>

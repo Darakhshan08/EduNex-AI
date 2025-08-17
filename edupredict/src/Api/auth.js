@@ -68,3 +68,7 @@ export const getProtectedData = async (token, allowedRole) => {
     return error.response;
   }
 };
+
+
+
+
