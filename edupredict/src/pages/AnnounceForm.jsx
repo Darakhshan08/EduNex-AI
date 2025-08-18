@@ -82,7 +82,7 @@ function AnnounceForm({ onClose }) {
             <X size={20} />
           </button>
           <div className="flex items-center mb-6">
-            <PencilIcon className="text-purple-500 mr-2" size={20} />
+            <PencilIcon className="text-[#9078e2] mr-2" size={20} />
             <h2 className="text-2xl font-serif text-gray-800">
               Make an Announcement
             </h2>
@@ -100,7 +100,7 @@ function AnnounceForm({ onClose }) {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="A brief summary of your feedback"
-                className="w-full p-3 border border-purple-300 rounded-lg bg-transparent focus:outline-none focus:ring-1 focus:ring-purple-400"
+                className="w-full p-3 border border-[#9078e2] rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
                 required
               />
             </div>
@@ -114,13 +114,13 @@ function AnnounceForm({ onClose }) {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Please provide details here..."
                 rows={6}
-                className="w-full p-3 border border-purple-300 rounded-lg bg-transparent focus:outline-none focus:ring-1 focus:ring-purple-400 resize-none"
+                className="w-full p-3 border border-[#9078e2] rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-[#9078e2] resize-none"
                 required
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-[#4f46e5] hover:bg-purple-500 text-white py-3 px-4 rounded-full flex items-center justify-center transition-colors"
+              className="w-full bg-[#9078e2] hover:bg-[#9078e2] text-white py-3 px-4 rounded-full flex items-center justify-center transition-colors"
             >
               <Send size={18} className="mr-2" />
               Make Announcement

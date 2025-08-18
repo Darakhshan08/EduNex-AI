@@ -157,7 +157,7 @@ function Dataset() {
                 type="file"
                 accept=".csv"
                 onChange={handleFileChange}
-                className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100"
+                className="border border-gray-300 rounded-md py-2 px-4 w-full cursor-pointer appearance-none hover:bg-gray-100 focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
               />
             </div>
 
@@ -168,7 +168,7 @@ function Dataset() {
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
+                  className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                 >
                   <option>XGBoost</option>
                   <option>Gradient Boosting</option>
@@ -212,7 +212,7 @@ function Dataset() {
               <input
                 type="text"
                 placeholder="Search datasets..."
-                className="bg-white border border-gray-300 rounded-md py-2 pl-10 pr-4 w-full"
+                className="bg-white border border-gray-300 rounded-md py-2 pl-10 pr-4 w-full focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -220,7 +220,7 @@ function Dataset() {
 
             <div className="relative min-w-[210px]">
               <select
-                className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none"
+                className="bg-white border border-gray-300 rounded-md py-2 px-4 w-full appearance-none focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                 value={sizeFilter}
                 onChange={(e) => setSizeFilter(e.target.value)}
               >

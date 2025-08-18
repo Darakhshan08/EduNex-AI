@@ -56,11 +56,11 @@ const UserManagement = () => {
           <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 flex-wrap mb-4">
             {/* 🔍 Search Box */}
             <div className="relative w-full md:max-w-xs">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#9078e2] h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search users..."
-                className="pl-10 pr-4 py-2 w-full rounded-md border border-gray-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                className="pl-10 pr-4 py-2 w-full rounded-md border border-gray-200 bg-white/80 text-sm focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -71,7 +71,7 @@ const UserManagement = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="px-4 py-2 rounded-md border border-gray-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                className="px-4 py-2 rounded-md border border-gray-200 bg-white/80 text-sm focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
               >
                 <option value="All Roles">All Roles</option>
                 <option value="Admin">Admin</option>
@@ -82,7 +82,7 @@ const UserManagement = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 rounded-md border border-gray-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                className="px-4 py-2 rounded-md border border-gray-200 bg-white/80 text-sm focus:ring-2 focus:outline-none focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
               >
                 <option value="All Status">All Status</option>
                 <option value="Active">Active</option>
@@ -118,12 +118,30 @@ const UserManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.map((user, index) => (
-                <tr key={user.id || user._id} className="border-b border-gray-200">
+                <tr
+                  key={user.id || user._id}
+                  className="border-b border-gray-200"
+                >
                   <td className="py-4 px-4 text-gray-700">{index + 1}</td>
                   <td className="py-4 px-4 text-gray-700">{user.name}</td>
                   <td className="py-4 px-4 text-gray-500">{user.email}</td>
                   <td className="py-4 px-4">
-                    <span className="px-2 py-1 rounded-md bg-gray-200 text-black text-base">
+                    <span
+                      className={`px-2 py-1 rounded-md text-sm 
+    ${
+      user.role?.toLowerCase() === "teacher" ? "bg-blue-200 text-blue-800" : ""
+    } 
+    ${
+      user.role?.toLowerCase() === "student"
+        ? "bg-green-200 text-green-800"
+        : ""
+    } 
+    ${
+      user.role?.toLowerCase() === "admin"
+        ? "bg-purple-200 text-purple-800"
+        : ""
+    }`}
+                    >
                       {user.role}
                     </span>
                   </td>
