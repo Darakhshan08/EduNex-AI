@@ -18,6 +18,12 @@ import {
 } from '../Api/dataset'
 import { predictStudentDropout } from '../Api/internal'
 
+// import {
+//   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+// } from 'recharts';
+
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 function Dataset() {
   const [showPredictionPopup, setShowPredictionPopup] = useState(false)
@@ -298,7 +304,7 @@ function Dataset() {
       </div>
 
       {/* Prediction Results Popup */}
-      {showPredictionPopup && predictionResult && (
+      {/* {showPredictionPopup && predictionResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="flex justify-between items-center border-b p-4">
@@ -350,9 +356,209 @@ function Dataset() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+{showPredictionPopup && predictionResult && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      {/* Header */}
+      <div className="flex justify-between items-center border-b p-4">
+        <h3 className="text-lg font-medium text-gray-900">
+          Prediction Results
+        </h3>
+        <button
+          onClick={() => setShowPredictionPopup(false)}
+          className="text-gray-400 hover:text-gray-500"
+        >
+          <XIcon size={20} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-6 space-y-6">
+        {/* Table */}
+        <table className="w-full">
+          <tbody>
+            {Object.entries(predictionResult).map(([key, value], index) => (
+              <tr
+                key={index}
+                className={index % 2 === 0 ? "bg-gray-50" : ""}
+              >
+                <td className="py-2 px-3 text-sm font-medium text-gray-700">
+                  {key}
+                </td>
+                <td className="py-2 px-3 text-sm text-gray-900 text-right">
+                  {typeof value === "number" ? value.toFixed(2) : value}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Gauges Row */}
+        <div className="flex flex-row items-center justify-center gap-8">
+          {/* Accuracy Gauge */}
+          <div className="flex flex-col items-center">
+            <div className="w-24 h-24">
+              {(() => {
+                const rawAcc =
+                  predictionResult["Model Test Accuracy"] ??
+                  predictionResult["Overall Dataset Accuracy"];
+                const accuracy =
+                  typeof rawAcc === "number" ? rawAcc : parseFloat(rawAcc) || 0;
+                return (
+                  <CircularProgressbar
+                    value={accuracy}
+                    maxValue={100}
+                    text={`${accuracy.toFixed(1)}%`}
+                    styles={buildStyles({
+                      textSize: "12px",
+                      pathColor: "#9078e2",
+                      textColor: "#333",
+                      trailColor: "#eee",
+                    })}
+                  />
+                );
+              })()}
+            </div>
+            <p className="mt-2 text-sm font-medium text-gray-700">Accuracy</p>
+          </div>
+
+          {/* Confidence Gauge */}
+          <div className="flex flex-col items-center">
+            <div className="w-24 h-24">
+              {(() => {
+                const rawConf = predictionResult["Confidence Score"];
+                const confidence =
+                  typeof rawConf === "number" ? rawConf : parseFloat(rawConf) || 0;
+                return (
+                  <CircularProgressbar
+                    value={confidence}
+                    maxValue={100}
+                    text={`${confidence.toFixed(1)}%`}
+                    styles={buildStyles({
+                      textSize: "12px",
+                      pathColor: "#34d399",
+                      textColor: "#333",
+                      trailColor: "#eee",
+                    })}
+                  />
+                );
+              })()}
+            </div>
+            <p className="mt-2 text-sm font-medium text-gray-700">Confidence</p>
+          </div>
+        </div>
+
+       {/* Actions (NEECHE inside .p-6) */}
+<div className="flex justify-end gap-x-2 mt-6 pt-4 ">
+  <button
+    onClick={() => setShowPredictionPopup(false)}
+    className="bg-[#c8c8ff] text-white py-2 px-6 rounded-md"
+  >
+    Close
+  </button>
+  <button
+    onClick={handleConfirmUpload}
+    className="bg-[#9078e2] text-white py-2 px-4 rounded-md disabled:opacity-60"
+    disabled={uploading}
+  >
+    {uploading ? "Uploading…" : "Confirm & Upload"}
+  </button>
+</div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   )
 }
 
 export default Dataset
+
+
+//  bar cahart popup code 
+
+// import {
+//   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+// } from 'recharts';
+
+
+// {showPredictionPopup && predictionResult && (
+//   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+//     <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+//       {/* Header */}
+//       <div className="flex justify-between items-center border-b p-4">
+//         <h3 className="text-lg font-medium text-gray-900">
+//           Prediction Results
+//         </h3>
+//         <button
+//           onClick={() => setShowPredictionPopup(false)}
+//           className="text-gray-400 hover:text-gray-500"
+//         >
+//           <XIcon size={20} />
+//         </button>
+//       </div>
+
+//       {/* Body */}
+//       <div className="p-6 space-y-6">
+//         {/* Table */}
+//         <table className="w-full rounded-md overflow-hidden border">
+//           <tbody>
+//             {Object.entries(predictionResult).map(([key, value], index) => (
+//               <tr
+//                 key={index}
+//                 className={index % 2 === 0 ? 'bg-gray-50' : ''}
+//               >
+//                 <td className="py-2 px-3 text-sm font-medium text-gray-700">
+//                   {key}
+//                 </td>
+//                 <td className="py-2 px-3 text-sm text-gray-900 text-right">
+//                   {typeof value === 'number' ? value.toFixed(2) : value}
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+
+//         {/* Chart */}
+//         <div className="h-64 w-full">
+//           <ResponsiveContainer>
+//             <BarChart
+//               data={[
+//                 { name: 'Mean', value: predictionResult['Mean Dropout Risk'] },
+//                 { name: 'Std Dev', value: predictionResult['Std Deviation'] },
+//                 { name: 'Min', value: predictionResult['Min Dropout Risk'] },
+//                 { name: 'Max', value: predictionResult['Max Dropout Risk'] },
+//                 { name: 'Confidence', value: predictionResult['Confidence Score'] },
+//                 { name: 'Accuracy', value: predictionResult['Model Test Accuracy'] || predictionResult['Overall Dataset Accuracy'] },
+//               ]}
+//             >
+//               <CartesianGrid strokeDasharray="3 3" />
+//               <XAxis dataKey="name" />
+//               <YAxis />
+//               <Tooltip />
+//               <Bar dataKey="value" fill="#9078e2" radius={[6, 6, 0, 0]} />
+//             </BarChart>
+//           </ResponsiveContainer>
+//         </div>
+
+//         {/* Actions */}
+//         <div className="flex justify-end gap-x-2">
+//           <button
+//             onClick={() => setShowPredictionPopup(false)}
+//             className="bg-[#c8c8ff] text-white py-2 px-6 rounded-md"
+//           >
+//             Close
+//           </button>
+//           <button
+//             onClick={handleConfirmUpload}
+//             className="bg-[#9078e2] text-white py-2 px-4 rounded-md disabled:opacity-60"
+//             disabled={uploading}
+//           >
+//             {uploading ? 'Uploading…' : 'Confirm & Upload'}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//     </div>
+// )}

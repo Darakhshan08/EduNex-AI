@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { BookOpenIcon } from 'lucide-react'
 import { predictStudentPerformance } from '../Api/internal'
+import { saveStudentAnalysis } from '../Api/studentinput'
 export const StudentForm = ({ setPrediction, setLoading, setError }) => {
   const [formData, setFormData] = useState({
     student_id: '',
@@ -45,12 +46,16 @@ const saveToHistory = (studentData, prediction) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await predictStudentPerformance(formData)
-      setPrediction(result)
-        // Save to localStorage
-      saveToHistory(formData, result)
+      // Backend ko call kareinge jo MongoDB me save karta hai
+      const result = await saveStudentAnalysis(formData)
+
+      // Prediction set karein (controller me already prediction aa raha hai)
+      setPrediction(result.data)
+
+      // History localStorage me bhi save
+      saveToHistory(formData, result.data)
     } catch (err) {
-      setError('Failed to get prediction. Please try again.')
+      setError('Failed to save student data. Please try again.')
       console.error(err)
     } finally {
       setLoading(false)
