@@ -58,4 +58,5 @@ const StudentanalysisSchema = new Schema({
   }
 });
 
-module.exports = mongoose.model("StudentAnalysis", StudentanalysisSchema);
+const StudentAnalysis = mongoose.model("StudentAnalysis", StudentanalysisSchema);
+module.exports = StudentAnalysis;

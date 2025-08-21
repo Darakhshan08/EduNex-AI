@@ -118,6 +118,7 @@ const TeacherDashboard = () => {
     Welcome,{" "}
     <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
       {userData.name}
+      
     </span>{" "}
     👋
   </h1>

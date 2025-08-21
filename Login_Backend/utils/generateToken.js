@@ -6,10 +6,11 @@ const generateToken = (user) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      student_id: user.student_id || null, // ensure value is here
     },
     "your_jwt_secret", // you should replace this with process.env.JWT_SECRET in production
-    { expiresIn: "1d" }
+    { expiresIn: "1h" } 
   );
 };
 

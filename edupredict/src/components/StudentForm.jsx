@@ -1,9 +1,63 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { BookOpenIcon } from 'lucide-react'
 import { predictStudentPerformance } from '../Api/internal'
 import { saveStudentAnalysis } from '../Api/studentinput'
 export const StudentForm = ({ setPrediction, setLoading, setError }) => {
+
+  const [userData, setUserData] = useState({
+    student_id: '',
+    name: '',
+    email: '',
+    role: ''
+  });
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  }
+  
+
+  useEffect(() => {
+    
+    const token = localStorage.getItem('student'); // 👈 token key ka naam clear rakho (e.g., "authToken")
+  
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded) {
+        setUserData({
+          student_id: decoded.student_id || '',
+          name: decoded.name || '',
+          email: decoded.email || '',
+          role: decoded.role || ''
+        });
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (userData.student_id && userData.name) {
+      setFormData((prev) => ({
+        ...prev,
+        student_id: userData.student_id,
+        student_name: userData.name,
+      }));
+    }
+  }, [userData]);
+
+
+
+
   const [formData, setFormData] = useState({
     student_id: '',
     student_name: '',
@@ -75,10 +129,11 @@ const saveToHistory = (studentData, prediction) => {
             </label>
             <input
               type="text"
-              name="student_id"
-              value={formData.student_id}
-              onChange={handleChange}
+              id="student_id"
+              value={userData.student_id}
+              // onChange={handleChange}
               required
+              readOnly
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />
           </div>
@@ -88,9 +143,10 @@ const saveToHistory = (studentData, prediction) => {
             </label>
             <input
               type="text"
-              name="student_name"
-              value={formData.student_name}
+              name="name"
+              value={userData.name}
               onChange={handleChange}
+              
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
             />

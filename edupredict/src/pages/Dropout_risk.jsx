@@ -68,22 +68,25 @@ function Dropout_risk() {
       transition={{ delay: 0.2, duration: 0.6 }}
       className="bg-white rounded-lg p-6 shadow-lg"
     >
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          Dropout Risk Student
-        </h2>
-        <p className="text-gray-600">
-          Individual student dropout risk predictions.
-        </p>
-      </div>
+     <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-2 items-start sm:items-center mb-4">
+              <div>
+              <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
+              Dropout Risk Student
+                </h1>
+                <p className="text-gray-600">
+                Individual student dropout risk predictions.
+                </p>
+              </div>
 
-      <div className="flex justify-between mb-6">
-        <div></div>
-        <button className="bg-white border border-gray-200 px-4 py-2 rounded-md flex items-center gap-2 text-gray-700">
-          <DownloadIcon size={16} />
-          <span>Download</span>
-        </button>
-      </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
+                <button  className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
+                  <DownloadIcon size={16} />
+                  <span>Download</span>
+                </button>
+              </div>
+            </div>
+
+     
 
       {/* Table */}
       <div className="overflow-x-auto">

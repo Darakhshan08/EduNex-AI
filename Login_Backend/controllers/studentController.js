@@ -1,6 +1,13 @@
 const axios = require("axios");
 const Studentanalysis = require("../model/Studentanalysis");
+const studentService = require("../service/studentService");
 
+
+
+
+exports.list = (req, res) => {
+  return studentService.getstudent(req, res);
+};
 
 exports.studentanalysis = async (req, res) => {
   try {

@@ -41,6 +41,41 @@ function Quiz() {
     }
   }, [selectedBatch, quizData]);
 
+
+  const downloadCSV = (rows, filename) => {
+    if (!rows.length) {
+      alert("No data available to download");
+      return;
+    }
+
+    const headers = Object.keys(rows[0]).join(",");
+    const csv = [
+      headers,
+      ...rows.map((row) =>
+        Object.values(row)
+          .map((val) => `"${val}"`) // wrap values in quotes for safety
+          .join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  };
+
+  // Handle download
+  const handleDownload = () => {
+    if (selectedBatch !== "Select Batch" && filteredData.length > 0) {
+      downloadCSV(filteredData, `quiz ${selectedBatch}.csv`);
+    } else {
+      downloadCSV(quizData, "Quiz_all.csv");
+    }
+  };
+
+
+
   const formattedData = filteredData.map((item) => ({
     month: item.month,
     name: item.course_id,
@@ -52,25 +87,25 @@ function Quiz() {
   if (loading || !formattedData) return <Loader />;
   return (
     <div className="flex w-full min-h-screen justify-center items-center p-4">
-      <div className="w-full max-w-7xl bg-white rounded-xl p-6 md:p-10 shadow-sm">
-        <div className="flex flex-col gap-8">
+      <div className="w-full max-w-7xl">
+        <div className="flex flex-col">
           {/* Chart Section */}
-          <div className="w-full">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <div className="bg-white rounded-lg p-6 mb-6 shadow-md">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-2 items-start sm:items-center mb-4">
               <div>
-                <h1 className="text-2xl md:text-3xl font-medium text-gray-800">
+                <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
                   Quiz Performance
                 </h1>
-                <p className="text-sm md:text-base text-gray-500">
+                <p className="text-gray-600">
                   Total quizzes Completed
                 </p>
               </div>
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
                 <div className="relative">
                   <select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pl-4 pr-10 text-gray-700"
+                    className="appearance-none w-full sm:w-auto bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#9078e2] transition"
                   >
                     <option value="Select Batch">Select Batch</option>
                     <option value="B001">B001</option>
@@ -84,16 +119,6 @@ function Quiz() {
                     <option value="B009">B009</option>
                     <option value="B010">B010</option>
                     <option value="B011">B011</option>
-
-                    {/* <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option> */}
                   </select>
 
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -106,7 +131,9 @@ function Quiz() {
                     </svg>
                   </div>
                 </div>
-                <button className="flex items-center justify-center gap-2 px-4 py-2 border rounded-md bg-white text-gray-700 w-full sm:w-auto">
+                <button 
+                onClick={handleDownload}
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
                   <DownloadIcon size={16} />
                   <span>Download</span>
                 </button>
@@ -159,50 +186,54 @@ function Quiz() {
             </div>
           </div>
 
-          {/* Table Section */}
-          <div className="w-full">
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
-              Quiz Breakdown
-            </h2>
-            <p className="text-sm md:text-base text-gray-600 mb-6">
-              Total quizzes
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <table className="w-full border-collapse">
+          <div className="bg-white rounded-lg p-6 shadow-md">
+        <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+        Quiz Breakdown
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Detailed attendance for each course
+          </p>
+          {formattedData.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full border border-gray-300">
                 <thead>
                   <tr>
-                    <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
                       Month
                     </th>
-                    <th className="py-3 px-4 text-left text-gray-600 font-medium border-b-2 border-gray-200">
-                      Courses
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                      Course
                     </th>
-                    <th className="py-3 px-4 text-right text-gray-600 font-medium border-b-2 border-gray-200">
-                      Total Quizzes
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                    Total Quizzes
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {formattedData.map((item, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-gray-100 hover:bg-gray-100 transition-colors"
-                    >
-                      <td className="py-4 px-4 text-gray-800 font-medium">
+                    <tr key={index}>
+                      <td className="py-3 px-4 text-gray-800 border border-gray-300">
                         {item.month}
                       </td>
-                      <td className="py-4 px-4 text-gray-800 font-medium">
+                      <td className="py-3 px-4 text-gray-800 border border-gray-300">
                         {item.name}
                       </td>
-                      <td className="py-4 px-4 text-right font-semibold text-gray-700">
+                      <td className="py-3 px-4 text-gray-800 border border-gray-300">
                         {item.total}
                       </td>
+                     
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          ) : (
+            <p className="text-center text-gray-500">
+              No attendance data available for this batch
+            </p>
+          )}
+        </div>
+        
         </div>
       </div>
     </div>

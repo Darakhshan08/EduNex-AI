@@ -17,12 +17,14 @@ import {
 } from "../Api/internal";
 import Loader from "../components/Custom/Loader";
 import axios from "axios";
+import { Award, CalendarClock, NotepadText, XCircleIcon } from "lucide-react";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [student, setStudent] = useState(null);
   const [record, recordData] = useState([]);
   const [userData, setUserData] = useState({
     name: '',
@@ -101,7 +103,12 @@ const StudentDashboard = () => {
         const chartData = uniqueCourses.map((item) => ({
           course: item.course,
           avg_attendance: item.avg_attendance,
+          avg_quizzes: item.avg_quizzes,
+          month: item.month
         }));
+
+      
+
 
         recordData(chartData);
       }
@@ -188,6 +195,37 @@ const StudentDashboard = () => {
   //   quizData();
   // }, []);
   
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const token = localStorage.getItem("student");
+        if (!token) return;
+  
+        const decoded = parseJwt(token); // 👈 token parse
+        if (!decoded || !decoded.student_id) return;
+  
+        const res = await axios.get(
+          `http://localhost:8000/api/student/${decoded.student_id}`, // backend me student_id ke basis pe fetch
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+  
+        if (res.data && res.data.data) {
+          setStudent(res.data.data); // object assign karo
+        }
+  
+        console.log("Decoded token:", decoded);
+        console.log("Student data:", res.data);
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+      }
+    };
+  
+    fetchStudent();
+  }, []);
+  
+  
 
 
 
@@ -267,8 +305,64 @@ const StudentDashboard = () => {
   </p>
 </motion.div>
 
-
-        <StudentTop data={courseData.summary_metrics} />
+<motion.div
+    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+    initial="hidden"
+    animate="visible"
+    variants={{
+      hidden: { opacity: 0 },
+      visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+    }}
+  >
+    <motion.div
+      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <NotepadText size={32} className="text-[#9078e2]" />
+        <div className="text-md text-gray-600">Quizzes</div>
+      </div>
+      <div className="text-3xl font-bold text-[#333333]"> {student ? student.quizzes_completed : "--"}</div>
+    </motion.div>
+  
+    <motion.div
+      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+      <CalendarClock size={32} className="text-[#9078e2]" />
+        <div className="text-md text-gray-600">Attendance</div>
+      </div>
+      <div className="text-3xl font-bold text-[#333333]"> {student ? student.attendance_percentage + "%" : "--"}</div>
+    </motion.div>
+  
+    <motion.div
+      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <XCircleIcon size={30} className="text-[#9078e2]" />
+        <div className="text-md text-gray-600">Gpa</div>
+      </div>
+      <div className="text-3xl font-bold text-[#333333]">{student ? student.gpa : "--"}</div>
+    </motion.div>
+  
+    <motion.div
+      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <Award size={30} className="text-[#9078e2]" />
+        <div className="text-md text-gray-600">Assignment</div>
+      </div>
+      <div className="text-3xl font-bold text-[#333333]"> {student ? student.assignments_completed : "--"}</div>
+    </motion.div>
+  </motion.div>
+      
 
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -290,8 +384,8 @@ const StudentDashboard = () => {
                 layout="vertical"
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 100]} />
-                <YAxis type="category" dataKey="course" width={150} />
+                <XAxis type="number" domain={[0, 80]} />
+                <YAxis type="category" dataKey="course" width={100} />
                 <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
                 <Bar
                   dataKey="avg_attendance" // show only avg attendance
@@ -381,6 +475,61 @@ const StudentDashboard = () => {
     </motion.button>
   </motion.div> */}
           </motion.div>
+
+
+
+
+          <motion.div
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <span className="inline-block w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>
+              Quiz Overview
+            </h2>
+
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={record} // use transformed data
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 45]} />
+                <YAxis type="category" dataKey="course" width={150} />
+                <Tooltip />
+                <Bar
+                  dataKey="avg_quizzes" // show only avg attendance
+                  fill="#9078e2"
+                  radius={[0, 6, 6, 0]}
+                  animationDuration={800}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+
+            {/* <motion.div
+              className="mt-4 pt-4 "
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.button
+                className="w-full px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-colors duration-200 text-sm font-medium"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <Link to="/studentattendance" className="w-full block">
+                  View All
+                </Link>
+              </motion.button>
+            </motion.div> */}
+          </motion.div>
+
+
+
+
+
+
 
 
           {/* <motion.div
@@ -539,12 +688,10 @@ const StudentDashboard = () => {
                 }}
               >
                 <div className="text-emerald-800 font-semibold mb-1">
-                  Overall Grade
+                  Dropout_Risk
                 </div>
-                <div className="text-3xl font-bold text-emerald-600">A-</div>
-                <div className="text-xs text-emerald-700 mt-1">
-                  Top 15% of class
-                </div>
+                <div className="text-3xl font-bold text-emerald-600">{student ? student.dropout_risk : "--"}</div>
+               
               </motion.div>
               <motion.div
                 className="p-4 bg-blue-50 rounded-lg border border-blue-100"
@@ -556,10 +703,10 @@ const StudentDashboard = () => {
                 }}
               >
                 <div className="text-blue-800 font-semibold mb-1">
-                  Attendance
+                 Student Performance
                 </div>
-                <div className="text-3xl font-bold text-blue-600">95%</div>
-                <div className="text-xs text-blue-700 mt-1">Last 30 days</div>
+                <div className="text-2xl font-bold text-blue-600">{student ? student.predicted_performance : "--"}</div>
+                
               </motion.div>
               <motion.div
                 className="p-4 bg-purple-50 rounded-lg border border-purple-100"
@@ -571,12 +718,10 @@ const StudentDashboard = () => {
                 }}
               >
                 <div className="text-purple-800 font-semibold mb-1">
-                  Completed
+                  LMS Engagement Score
                 </div>
-                <div className="text-3xl font-bold text-purple-600">24/30</div>
-                <div className="text-xs text-purple-700 mt-1">
-                  Assignments this term
-                </div>
+                <div className="text-3xl font-bold text-purple-600">{student ? student.lms_engagement_score : "--"}%</div>
+                
               </motion.div>
             </div>
           </motion.div>
