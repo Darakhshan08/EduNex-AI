@@ -44,6 +44,44 @@ function Stdperform() {
     return `${(count / total) * 100}%`;
   };
 
+
+
+  const downloadCSV = (rows, filename) => {
+    if (!rows.length) {
+      alert("No data available to download");
+      return;
+    }
+
+    const headers = Object.keys(rows[0]).join(",");
+    const csv = [
+      headers,
+      ...rows.map((row) =>
+        Object.values(row)
+          .map((val) => `"${val}"`) // wrap values in quotes for safety
+          .join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  };
+
+  // Handle download
+  const handleDownload = () => {
+    const today = new Date().toISOString().split("T")[0]; // 2025-08-22
+    if (studentData.length > 0) {
+      downloadCSV(studentData, `Student Predicted Performance${today}.csv`);
+    } else {
+      downloadCSV(studentData, `Student Predicted Performance${today}.csv`);
+    }
+  };
+
+
+
+
   return (
     <div className="rounded-lg p-4 min-h-screen w-full md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -114,7 +152,9 @@ function Stdperform() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
-              <button className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
+              <button 
+              onClick={handleDownload}
+              className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
                 <DownloadIcon size={16} />
                 <span>Download</span>
               </button>

@@ -1,14 +1,15 @@
 import React from 'react'
-import Navbar from '../components/Navbar'
 import Herosection from '../components/Herosection'
 import Aboutsection from '../components/Aboutsection'
 import StarBackground from '../components/StarBackground'
 import FeatureSection from '../components/FeatureSection'
-import Works from '../components/Works';
+import Works from '../components/Works'
 import Course from '../components/Course'
-import FooterSection from '../components/FooterSection'
+
+
 
 const categories = [
+
   {
     title: 'Art & Design',
     courseCount: 10,
@@ -103,7 +104,6 @@ function Home1() {
         </div>
       </div>
     </div>
-
     </div>
   )
 }

@@ -104,6 +104,7 @@ const StudentDashboard = () => {
           course: item.course,
           avg_attendance: item.avg_attendance,
           avg_quizzes: item.avg_quizzes,
+          avg_assignment: item.avg_assignment,
           month: item.month
         }));
 
@@ -385,7 +386,7 @@ const StudentDashboard = () => {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" domain={[0, 80]} />
-                <YAxis type="category" dataKey="course" width={100} />
+                <YAxis type="category" dataKey="course" width={100} tick={{ fontSize: 15 }} />
                 <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
                 <Bar
                   dataKey="avg_attendance" // show only avg attendance
@@ -496,11 +497,11 @@ const StudentDashboard = () => {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" domain={[0, 45]} />
-                <YAxis type="category" dataKey="course" width={150} />
+                <YAxis type="category" dataKey="course" width={100} tick={{ fontSize: 15 }} />
                 <Tooltip />
                 <Bar
                   dataKey="avg_quizzes" // show only avg attendance
-                  fill="#9078e2"
+                  fill="#a48fe6"
                   radius={[0, 6, 6, 0]}
                   animationDuration={800}
                 />
@@ -526,7 +527,51 @@ const StudentDashboard = () => {
           </motion.div>
 
 
+          <motion.div
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <span className="inline-block w-3 h-3 bg-sky-400 rounded-full mr-2"></span>
+              Assignment Overview
+            </h2>
 
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={record} // use transformed data
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 'dataMax + 5']} />
+                <YAxis type="category" dataKey="course" width={100} tick={{ fontSize: 15 }} />
+                <Tooltip />
+                <Bar
+                  dataKey="avg_assignment" // show only avg attendance
+                  fill="#c4bef0"
+                  radius={[0, 6, 6, 0]}
+                  animationDuration={800}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+
+            {/* <motion.div
+              className="mt-4 pt-4 "
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.button
+                className="w-full px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-colors duration-200 text-sm font-medium"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <Link to="/studentattendance" className="w-full block">
+                  View All
+                </Link>
+              </motion.button>
+            </motion.div> */}
+          </motion.div>
 
 
 

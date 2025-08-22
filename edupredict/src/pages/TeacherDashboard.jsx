@@ -4,11 +4,14 @@ import { academic_performance, teacher_analysis } from '../Api/internal';
 import Loader from '../components/Custom/Loader';
 import TeacherTop from '../components/Tabs/TeacherTop';
 import PieCharts from '../components/Custom/PieChart';
+import axios from 'axios';
 
 const TeacherDashboard = () => {
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [students, setStudents] = useState([]);
   const [recentAnalyses, setRecentAnalyses] = useState([]);
+
 
   const [userData, setUserData] = useState({
     name: '',
@@ -54,14 +57,26 @@ const TeacherDashboard = () => {
     }
   }, []);
 
-
+  useEffect(() => {
+    // Backend API se data fetch
+    axios
+      .get("http://localhost:8000/api/student") // 👈 tumhare backend ka route
+      .then((res) => {
+       setStudents(res.data.data.slice(0, 5)); // 👈 sirf pehle 5 records
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching students:", err);
+        setLoading(false);
+      });
+  }, []);
 
 
   // Load recent analyses from localStorage
-  useEffect(() => {
-    const history = JSON.parse(localStorage.getItem('studentHistory') || '[]');
-    setRecentAnalyses(history.slice(0, 3));
-  }, []);
+  // useEffect(() => {
+  //   const history = JSON.parse(localStorage.getItem('studentHistory') || '[]');
+  //   setRecentAnalyses(history.slice(0, 3));
+  // }, []);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -151,39 +166,39 @@ const TeacherDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {recentAnalyses.length > 0 ? (
-                  recentAnalyses.map((analysis, index) => (
+                {students.length > 0 ? (
+                  students.map((analysis, index) => (
                     <tr key={index}>
-                      <td className="px-4 py-3 whitespace-nowrap">{analysis.student_name}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{formatDate(analysis.date)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">{analysis.name}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">{formatDate(analysis.created_at)}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            analysis.prediction.predicted_performance === 'Excellent'
+                            analysis.predicted_performance === 'Excellent'
                               ? 'bg-green-100 text-green-800'
-                              : analysis.prediction.predicted_performance === 'Good'
+                              : analysis.predicted_performance === 'Good'
                               ? 'bg-green-100 text-green-800'
-                              : analysis.prediction.predicted_performance === 'Average'
+                              : analysis.predicted_performance === 'Average'
                               ? 'bg-yellow-100 text-yellow-800'
-                              : analysis.prediction.predicted_performance === 'Below Average'
+                              : analysis.predicted_performance === 'Below Average'
                               ? 'bg-red-100 text-red-800'
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
-                          {analysis.prediction.predicted_performance}
+                          {analysis.predicted_performance}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            analysis.prediction.dropout_risk === 'Low'
+                            analysis.dropout_risk === 'Low'
                               ? 'bg-green-100 text-green-800'
-                              : analysis.prediction.dropout_risk === 'Medium'
+                              : analysis.dropout_risk === 'Medium'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
-                          {analysis.prediction.dropout_risk}
+                          {analysis.dropout_risk}
                         </span>
                       </td>
                     </tr>

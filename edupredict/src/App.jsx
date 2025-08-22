@@ -29,9 +29,10 @@ import Assignment from "./pages/Assignment";
 import Otpverify from "./pages/Otpverify";
 import Prediction from "./pages/Prediction";
 import Guestlayout from "./components/Custom/GuestLayout";
-import Home1 from "../theme/Home1";
 import { About } from "./theme/About";
 import Contact from "./theme/Contact";
+import Home1 from "./theme/Home1";
+
 
 
 export function App() {
@@ -57,10 +58,10 @@ export function App() {
           <AnimatePresence mode="wait">
             
               <Routes>
-                <Route path="/home1" element={<Guestlayout><Home1 /></Guestlayout>} />
+                <Route path="/" element={<Guestlayout><Home1/></Guestlayout>} />
                 <Route path="/about" element={<Guestlayout><About /></Guestlayout>} />
                 <Route path="/contact" element={<Guestlayout><Contact /></Guestlayout>} />
-                <Route path="/" element={<Home />} />
+                {/* <Route path="/" element={<Home />} /> */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/otp" element={<Otpverify />} />
@@ -145,30 +146,6 @@ export function App() {
                 />
 
                 <Route
-                  path="/studentattendance"
-                  element={
-                    <AuthLayout token={"student"}>
-                      <StudentAttendance />
-                    </AuthLayout>
-                  }
-                />
-                <Route
-                  path="/studentquiz"
-                  element={
-                    <AuthLayout token={"student"}>
-                      <Quiz />
-                    </AuthLayout>
-                  }
-                />
-                <Route
-                  path="/assignment"
-                  element={
-                    <AuthLayout token={"student"}>
-                      <Assignment />
-                    </AuthLayout>
-                  }
-                />
-                <Route
                   path="/analysis"
                   element={
                     <AuthLayout token={"student"}>
@@ -200,6 +177,30 @@ export function App() {
                   element={
                     <AuthLayout token={"teacher"}>
                       <Dropout_risk />
+                    </AuthLayout>
+                  }
+                />
+                 <Route
+                  path="/studentattendance"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <StudentAttendance />
+                    </AuthLayout>
+                  }
+                />
+                <Route
+                  path="/studentquiz"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <Quiz />
+                    </AuthLayout>
+                  }
+                />
+                <Route
+                  path="/assignment"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <Assignment />
                     </AuthLayout>
                   }
                 />

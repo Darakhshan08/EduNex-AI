@@ -8,7 +8,16 @@ function Dropout_risk() {
   const [studentData, setStudentData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [selectedReason, setSelectedReason] = useState(null);
   const itemsPerCategory = 20; // 20 Low + 20 Medium + 20 High = 60 per page
+
+  const riskColor = {
+    Low: "bg-green-200 text-green-800",
+    Medium: "bg-orange-200 text-orange-800",
+    High: "bg-red-200 text-red-800",
+  };
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +70,43 @@ function Dropout_risk() {
     ) / itemsPerCategory
   );
 
+
+  const downloadCSV = (rows, filename) => {
+    if (!rows.length) {
+      alert("No data available to download");
+      return;
+    }
+
+    const headers = Object.keys(rows[0]).join(",");
+    const csv = [
+      headers,
+      ...rows.map((row) =>
+        Object.values(row)
+          .map((val) => `"${val}"`) // wrap values in quotes for safety
+          .join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  };
+
+  // Handle download
+  const handleDownload = () => {
+    const today = new Date().toISOString().split("T")[0]; // 2025-08-22
+    if (studentData.length > 0) {
+      downloadCSV(studentData, `Dropout_risk_${today}.csv`);
+    } else {
+      downloadCSV(studentData, `Dropout_risk_${today}.csv`);
+    }
+  };
+  
+
+
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -79,7 +125,10 @@ function Dropout_risk() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
-                <button  className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
+                <button 
+                onClick={handleDownload}
+                
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
                   <DownloadIcon size={16} />
                   <span>Download</span>
                 </button>
@@ -90,89 +139,102 @@ function Dropout_risk() {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                Student Name
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                Course
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                Attendance
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                Gpa
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
-              Assignments
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">
-              Quiz
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <AnimatePresence>
-              {paginatedData.map((student, index) => {
-               const riskLevel = student.risk_level?.charAt(0).toUpperCase() + student.risk_level?.slice(1).toLowerCase();
+      <table className="min-w-full border border-gray-300">
+        <thead>
+          <tr className="border-b border-gray-200">
+          <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Student Name</th>
+          <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Course</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Attendance</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">GPA</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Assignments</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Quizzes</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">LMS Score</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Prev. Failures</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Risk Level</th>
+            <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <AnimatePresence>
+            {paginatedData.map((student, index) => {
+              const riskLevel =
+                student.risk_level?.charAt(0).toUpperCase() +
+                student.risk_level?.slice(1).toLowerCase();
 
-                const riskColor = {
-                  Low: "bg-green-200 text-green-800",
-                  Medium: "bg-orange-200 text-orange-800",
-                  High: "bg-red-200 text-red-800",
-                };
-                // const riskIcon = {
-                //   Low: "🟢",
-                //   Medium: "🟠",
-                //   High: "🔴",
-                // };
-
-                return (
-                  <motion.tr
-                    key={student.student_id + index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <td className="py-3 px-4 text-gray-800">{student.name}</td>
-                    <td className="py-3 px-4 text-gray-800">
-                      {student.Course}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800">
-                      {student.attendance}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800">{student.gpa}</td>
-                    <td className="py-3 px-4 text-gray-800">
-                      {student.assignments_completed}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800">
-                      {student.quizzes_completed}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800">
-                      {student.lms_engagement_score}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800">
-                      {student.previous_failures}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`text-xs px-3 py-1 rounded-full flex items-center gap-1 ${riskColor[riskLevel]}`}
-                      >
+              return (
+                <motion.tr
+                  key={student.student_id + index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="border-b"
+                >
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.name}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.Course}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.attendance}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.gpa}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.assignments_completed}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.quizzes_completed}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.lms_engagement_score}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">{student.previous_failures}</td>
+                   <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full ${riskColor[riskLevel]}`}
+                    >
                       {riskLevel}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-800 whitespace-pre-line">
-                      {student.risk_reason}
-                    </td>
-                  </motion.tr>
-                );
-              })}
-            </AnimatePresence>
-          </tbody>
-        </table>
-      </div>
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                    {student.risk_reason?.length > 15 ? (
+                      <>
+                        {student.risk_reason.slice(0, 15)}...
+                        <button
+                          className="text-blue-600 underline ml-1"
+                          onClick={() => setSelectedReason(student.risk_reason)}
+                        >
+                          Read More
+                        </button>
+                      </>
+                    ) : (
+                      student.risk_reason
+                    )}
+                  </td>
+                </motion.tr>
+              );
+            })}
+          </AnimatePresence>
+        </tbody>
+      </table>
+
+      {/* Popup Modal */}
+      <AnimatePresence>
+        {selectedReason && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <h2 className="text-lg font-semibold mb-3">Reason</h2>
+              <p className="text-gray-700 whitespace-pre-line">{selectedReason}</p>
+              <button
+                onClick={() => setSelectedReason(null)}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+
 
       {/* Pagination */}
       <div className="flex justify-center mt-6 gap-2">

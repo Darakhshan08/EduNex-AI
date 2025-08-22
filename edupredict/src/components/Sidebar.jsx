@@ -131,7 +131,7 @@ const Sidebar = () => {
           variants={Nav_animation}
           initial={isTabletMid ? { x: -250 } : { x: 0 }}
           animate={open ? "open" : "closed"}
-          className="bg-white text-gray z-[999] max-w-[16rem] w-[16rem] overflow-hidden md:relative fixed h-screen shadow-xl"
+          className="bg-white text-gray z-[999] max-w-[16rem] w-[16rem] overflow-x-auto md:relative fixed h-screen shadow-xl"
         >
           {/* Logo */}
           <div className="gradient-bg flex items-center gap-2.5 font-medium py-4 border-slate-300 mx-3 rounded-b-xl mb-4">
@@ -343,50 +343,7 @@ const Sidebar = () => {
                   </NavLink>
                 </motion.li> */}
 
-                <motion.li variants={itemVariants}>
-                  <NavLink
-                    to="/studentattendance"
-                    className={({ isActive }) =>
-                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
-                        ? "sidebar-link-active font-bold"
-                        : "hover:bg-gray-100"
-                      }`
-                    }
-                  >
-                    <CalendarClock size={30} />
-                    {open && <span>Attendance</span>}
-                  </NavLink>
-                </motion.li>
-
-                <motion.li variants={itemVariants}>
-                  <NavLink
-                    to="/studentquiz"
-                    className={({ isActive }) =>
-                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
-                        ? "sidebar-link-active font-bold"
-                        : "hover:bg-gray-100"
-                      }`
-                    }
-                  >
-                    <NotepadText size={30} />
-                    {open && <span>Quiz</span>}
-                  </NavLink>
-                </motion.li>
-
-                <motion.li variants={itemVariants}>
-                  <NavLink
-                    to="/assignment"
-                    className={({ isActive }) =>
-                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
-                        ? "sidebar-link-active font-bold"
-                        : "hover:bg-gray-100"
-                      }`
-                    }
-                  >
-                    <Award size={30} />
-                    {open && <span>Assignment</span>}
-                  </NavLink>
-                </motion.li>
+               
 
                 <motion.li variants={itemVariants}>
                   <NavLink
@@ -496,7 +453,50 @@ const Sidebar = () => {
                     {open && <span>Dashboard</span>}
                   </NavLink>
                 </motion.li>
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/studentattendance"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <CalendarClock size={30} />
+                    {open && <span>Attendance</span>}
+                  </NavLink>
+                </motion.li>
 
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/studentquiz"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <NotepadText size={30} />
+                    {open && <span>Quiz</span>}
+                  </NavLink>
+                </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/assignment"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <Award size={30} />
+                    {open && <span>Assignment</span>}
+                  </NavLink>
+                </motion.li>
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/dropout"

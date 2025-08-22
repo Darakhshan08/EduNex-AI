@@ -28,39 +28,49 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     if (!email || !password) {
       toast.error("Enter required fields");
       setLoading(false);
       return;
     }
-
+  
     let role = "admin";
     if (isStudent) role = "student";
     else if (isTeacher) role = "teacher";
-
+  
     const data = { email, password, role };
     const response = await login(data);
-
+  
     if (response?.status === 200) {
       const { token, student, courses } = response.data;
-
+  
+      // ⏳ expiry time add
+      const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
+  
       if (role === "student") {
-        localStorage.setItem("student", JSON.stringify({ token, student }));
+        localStorage.setItem(
+          "student",
+          JSON.stringify({ token, student, expiry })
+        );
       } else if (role === "teacher") {
-        localStorage.setItem("teacher", JSON.stringify({ token, courses }));
+        localStorage.setItem(
+          "teacher",
+          JSON.stringify({ token, courses, expiry })
+        );
       } else if (role === "admin") {
-        localStorage.setItem("admin", token);
+        localStorage.setItem("admin", JSON.stringify({ token, expiry }));
       }
-
+  
       toast.success("Login successful!");
       navigate("/");
     } else {
       toast.error("Invalid credentials");
     }
-
+  
     setLoading(false);
   };
+  
 
   const containerVariants = {
     hidden: { opacity: 0 },

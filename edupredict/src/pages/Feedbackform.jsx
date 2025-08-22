@@ -114,7 +114,7 @@ function Feedbackform({ onClose }) {
             </div>
             <button
               type="submit"
-              className="w-full bg-[#4f46e5] hover:bg-purple-500 text-white py-3 px-4 rounded-full flex items-center justify-center transition-colors"
+              className="w-full bg-[#9078e2] hover:bg-[#9078e2] text-white py-3 px-4 rounded-full flex items-center justify-center transition-colors"
             >
               <Send size={18} className="mr-2" />
               Send Feedback
