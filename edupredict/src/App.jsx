@@ -30,6 +30,9 @@ import Otpverify from "./pages/Otpverify";
 import Prediction from "./pages/Prediction";
 import Guestlayout from "./components/Custom/GuestLayout";
 import Home1 from "../theme/Home1";
+import { About } from "./theme/About";
+import Contact from "./theme/Contact";
+
 
 export function App() {
   // For demo purposes, we'll add state to toggle between user roles
@@ -55,6 +58,8 @@ export function App() {
             
               <Routes>
                 <Route path="/home1" element={<Guestlayout><Home1 /></Guestlayout>} />
+                <Route path="/about" element={<Guestlayout><About /></Guestlayout>} />
+                <Route path="/contact" element={<Guestlayout><Contact /></Guestlayout>} />
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
