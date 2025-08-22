@@ -28,8 +28,8 @@ import StudentHistory from "./pages/StudentHistory";
 import Assignment from "./pages/Assignment";
 import Otpverify from "./pages/Otpverify";
 import Prediction from "./pages/Prediction";
-import Index from "./pages/Index";
 import Guestlayout from "./components/Custom/GuestLayout";
+import Home1 from "../theme/Home1";
 
 export function App() {
   // For demo purposes, we'll add state to toggle between user roles
@@ -54,7 +54,7 @@ export function App() {
           <AnimatePresence mode="wait">
             
               <Routes>
-                <Route path="/index" element={<Guestlayout><Index /></Guestlayout>} />
+                <Route path="/home1" element={<Guestlayout><Home1 /></Guestlayout>} />
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
