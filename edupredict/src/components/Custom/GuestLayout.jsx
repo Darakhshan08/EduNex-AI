@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "../Navbar";
+import FooterSection from "../FooterSection";
 
 function Guestlayout(props) {
   const { children } = props;
@@ -7,7 +8,9 @@ function Guestlayout(props) {
     <div>
       <Navbar />
       {children}
+      <FooterSection />
     </div>
+    
   );
 }
 

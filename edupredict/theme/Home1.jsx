@@ -6,6 +6,7 @@ import StarBackground from '../components/StarBackground'
 import FeatureSection from '../components/FeatureSection'
 import Works from '../components/Works';
 import Course from '../components/Course'
+import FooterSection from '../components/FooterSection'
 
 const categories = [
   {
@@ -61,8 +62,7 @@ const categories = [
 function Home1() {
   return (
     <div className="w-full min-h-screen">
-      <Navbar />
-      <Herosection/>
+    <Herosection/>
       <Aboutsection />
       <StarBackground />
       <FeatureSection />
@@ -79,8 +79,8 @@ function Home1() {
       {/* Content */}
       <div className="relative z-10 py-10 px-4 md:px-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-center mb-10 text-[#9078e2] animate-fadeIn">
-            Explore Our Course Categories
+           <h1 className="text-4xl font-bold text-center mb-10 animate-fadeIn">
+           Explore Our <span className="text-[#9078e2]">Course</span> Categories
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {categories.map((category, index) => (
@@ -103,6 +103,7 @@ function Home1() {
         </div>
       </div>
     </div>
+
     </div>
   )
 }
