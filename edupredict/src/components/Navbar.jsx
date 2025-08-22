@@ -39,12 +39,15 @@ function Navbar() {
     </nav>
   );
 }
-const NavItem = ({ text }) => {
-   return ( 
-   <div className="flex items-center cursor-pointer"> 
-   <span className="text-gray-700">{text}</span> 
-   </div>
-    ) 
-  }
+const NavItem = ({ text, to }) => {
+  return (
+    <Link
+      to={to}
+      className="flex items-center cursor-pointer text-gray-700 hover:text-purple-600 transition-colors duration-200"
+    >
+      <span>{text}</span>
+    </Link>
+  );
+};
 
 export default Navbar;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { BookOpenIcon } from 'lucide-react'
-import { predictStudentPerformance } from '../Api/internal'
+// import { predictStudentPerformance } from '../Api/internal'
 import { saveStudentAnalysis } from '../Api/studentinput'
 export const StudentForm = ({ setPrediction, setLoading, setError }) => {
 

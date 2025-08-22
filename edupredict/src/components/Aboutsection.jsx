@@ -2,7 +2,7 @@ import React from 'react'
 
 function Aboutsection() {
  return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full  bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8 relative overflow-hidden">
         {/* Dotted pattern decoration */}
         <div className="absolute top-4 left-4 w-40 h-40 grid grid-cols-10 gap-2">
