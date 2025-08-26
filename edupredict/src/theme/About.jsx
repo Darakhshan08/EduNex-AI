@@ -63,6 +63,7 @@ export function About() {
   return (
     <div className="w-full bg-white">
      <ContactSection />
+    
     <section
       className="py-16 md:py-24 container mx-auto px-6 bg-gray-50"
       ref={sectionRef}

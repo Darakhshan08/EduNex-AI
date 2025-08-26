@@ -222,40 +222,46 @@ const Login = () => {
             </motion.div>
 
             {/* Email */}
-            <motion.div variants={itemVariants}>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
-              <motion.input
-                type="email"
-                name="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
-                whileFocus={{ scale: 1.01 }}
-                required
-              />
-            </motion.div>
+             <motion.div variants={itemVariants}>
+    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+      Email Address
+    </label>
+    <motion.input
+      type="email"
+      name="email"
+      id="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      placeholder="you@example.com"
+      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
+      whileFocus={{ scale: 1.01 }}
+      required
+      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+      title="Please enter a valid email address (e.g. user@example.com)"
+    />
+  </motion.div>
 
             {/* Password */}
-            <motion.div variants={itemVariants}>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <motion.input
-                type="password"
-                name="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
-                whileFocus={{ scale: 1.01 }}
-                required
-              />
-            </motion.div>
+          <motion.div variants={itemVariants}>
+  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+    Password
+  </label>
+  <motion.input
+    type="password"
+    name="password"
+    id="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="••••••••"
+    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
+    whileFocus={{ scale: 1.01 }}
+    required
+    minLength={6}
+    maxLength={20}
+    pattern="^(?=.*[A-Za-z])(?=.*[0-9]).{6,}$"
+    title="Password must be at least 6 characters long and contain at least one letter and one number"
+  />
+</motion.div>
 
             {/* Submit */}
             <motion.div variants={itemVariants}>

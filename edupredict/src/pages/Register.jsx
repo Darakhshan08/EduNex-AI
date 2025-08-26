@@ -131,110 +131,122 @@ function Register() {
           {/* Toast Notifications */}
           <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Full Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
+         <form onSubmit={handleSubmit} className="space-y-5">
+  {/* Name */}
+  <div>
+    <label className="block text-gray-700 font-medium mb-2">Full Name</label>
+    <input
+      type="text"
+      name="name"
+      value={formData.name}
+      onChange={handleChange}
+      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
+      placeholder="Enter your full name"
+      required
+      pattern="^[A-Za-z\s]"
+      title="Name should be 3-50 characters long and contain only letters."
+    />
+  </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Email Address</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
+  {/* Email */}
+  <div>
+    <label className="block text-gray-700 font-medium mb-2">Email Address</label>
+    <input
+      type="email"
+      name="email"
+      value={formData.email}
+      onChange={handleChange}
+      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
+      placeholder="Enter your email"
+      required
+      pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+      title="Please enter a valid email address."
+    />
+  </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
-                placeholder="Create a password"
-                required
-              />
-            </div>
+  {/* Password */}
+  <div>
+    <label className="block text-gray-700 font-medium mb-2">Password</label>
+    <input
+      type="password"
+      name="password"
+      value={formData.password}
+      onChange={handleChange}
+      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
+      placeholder="Create a password"
+      required
+      pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$"
+      title="Password must be at least 6 characters, include one uppercase letter, one number, and one special character."
+    />
+  </div>
 
-            {/* Role Selection */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">I am a:</label>
-              <div className="grid grid-cols-2 gap-4">
-                {['student', 'teacher'].map((roleOption) => (
-                  <div
-                    key={roleOption}
-                    className={`border rounded-lg p-4 flex flex-col items-center cursor-pointer transition-colors ${
-                      formData.role === roleOption
-                        ? 'border-[#9078e2] bg-[#f0ecfd]'
-                        : 'border-gray-300 hover:border-blue-300'
-                    }`}
-                    onClick={() => setFormData({ ...formData, role: roleOption })}
-                  >
-                    <div className="text-3xl mb-2">
-                      {roleOption === 'student' ? '👨‍🎓' : '👨‍🏫'}
-                    </div>
-                    <span className="font-medium capitalize">{roleOption}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+  {/* Role Selection */}
+  <div>
+    <label className="block text-gray-700 font-medium mb-2">I am a:</label>
+    <div className="grid grid-cols-2 gap-4">
+      {['student', 'teacher'].map((roleOption) => (
+        <div
+          key={roleOption}
+          className={`border rounded-lg p-4 flex flex-col items-center cursor-pointer transition-colors ${
+            formData.role === roleOption
+              ? 'border-[#9078e2] bg-[#f0ecfd]'
+              : 'border-gray-300 hover:border-blue-300'
+          }`}
+          onClick={() => setFormData({ ...formData, role: roleOption })}
+        >
+          <div className="text-3xl mb-2">
+            {roleOption === 'student' ? '👨‍🎓' : '👨‍🏫'}
+          </div>
+          <span className="font-medium capitalize">{roleOption}</span>
+        </div>
+      ))}
+    </div>
+  </div>
 
-            {/* Conditional Fields */}
-            {formData.role === 'student' && (
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Student ID</label>
-                <input
-                  type="text"
-                  name="student_id"
-                  value={formData.student_id}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
-                  placeholder="Enter your student ID"
-                  required
-                />
-              </div>
-            )}
-            {formData.role === 'teacher' && (
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Course</label>
-                <input
-                  type="text"
-                  name="courses"
-                  value={formData.courses}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
-                  placeholder="Course you teach"
-                  required
-                />
-              </div>
-            )}
+  {/* Conditional Fields */}
+  {formData.role === 'student' && (
+    <div>
+      <label className="block text-gray-700 font-medium mb-2">Student ID</label>
+      <input
+        type="text"
+        name="student_id"
+        value={formData.student_id}
+        onChange={handleChange}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
+        placeholder="Enter your student ID"
+        required
+        pattern="^[0-9]{4,10}$"
+        title="Student ID must be 4-10 digits."
+      />
+    </div>
+  )}
 
-            {/* Submit */}
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#9078e2] hover:bg-[#9078e2] text-white rounded-lg font-medium shadow-sm disabled:opacity-70"
-            >
-              Create Account
-            </button>
-          </form>
+  {formData.role === 'teacher' && (
+    <div>
+      <label className="block text-gray-700 font-medium mb-2">Course</label>
+      <input
+        type="text"
+        name="courses"
+        value={formData.courses}
+        onChange={handleChange}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
+        placeholder="Course you teach"
+        required
+        pattern="^[A-Za-z\s]{3,50}$"
+        title="Course name should be 3-50 letters."
+      />
+    </div>
+  )}
+
+  {/* Submit */}
+  <button
+    type="submit"
+    className="w-full py-3 bg-[#9078e2] hover:bg-[#9078e2] text-white rounded-lg font-medium shadow-sm disabled:opacity-70"
+  >
+    Create Account
+  </button>
+</form>
+
         </div>
       </div>
     </div>
