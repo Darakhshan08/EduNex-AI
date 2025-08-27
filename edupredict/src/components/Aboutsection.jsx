@@ -2,7 +2,7 @@ import React from 'react'
 
 function Aboutsection() {
  return (
-    <div className="w-full  bg-gray-50">
+    <div className="w-full min-h-screen ">
       <div className="max-w-7xl mx-auto px-4 py-8 relative overflow-hidden">
         {/* Dotted pattern decoration */}
         <div className="absolute top-4 left-4 w-40 h-40 grid grid-cols-10 gap-2">
@@ -27,8 +27,8 @@ function Aboutsection() {
                   13<span className="text-2xl">+</span>
                 </span>
                 <div className="ml-4">
-                  <p className="font-bold text-sm">YEARS EXPERIENCE</p>
-                  <p className="font-bold text-sm">JUST ACHIVED</p>
+                  <p className="font-bold text-sm text-4xl">Years in </p>
+                  <p className="font-bold text-sm text-4xl">Predictive Education</p>
                 </div>
               </div>
             </div>
@@ -47,17 +47,18 @@ function Aboutsection() {
               About Us
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-              Welcome to the{' '}
+             Transforming Education{' '}
               <span className="relative">
-                Online
-                <span className="absolute bottom-1 left-0 w-full h-1 bg-pink-500"></span>
+                with the Power
               </span>{' '}
-              Learning Center
+             of Prediction
             </h1>
             <div className="border-l-2 border-gray-300 pl-4 py-2 mb-6">
               <p className="text-gray-600">
-                25+ Contrary to popular belief, Lorem Ipsum is not simply random
-                text roots in a piece of classical Latin literature from 45 BC
+                 EduNex AI is an AI-driven platform designed to revolutionize learning.
+                 By combining predictive analytics with smart classroom insights, we help educators understand student
+                 performance, identify learning gaps,
+                 and provide personalized solutions—before challenges turn into setbacks.
               </p>
             </div>
             <ul className="space-y-4">
@@ -79,7 +80,7 @@ function Aboutsection() {
                   </svg>
                 </div>
                 <span className="text-gray-800 font-medium">
-                  Lorem Ipsum is simply dummy
+                 Our mission is simple: to empower teachers and institutions with the tools to create brighter academic futures.
                 </span>
               </li>
               <li className="flex items-start">
@@ -100,30 +101,12 @@ function Aboutsection() {
                   </svg>
                 </div>
                 <span className="text-gray-800 font-medium">
-                  Explore a variety of fresh educational teach
+                  From early warning systems to customized learning paths, 
+                  EduNex AI ensures that no student is left behind. With data as our guide and innovation as our strength,
+                   we are shaping a smarter, more inclusive future for education.
                 </span>
               </li>
-              <li className="flex items-start">
-                <div className="flex-shrink-0 w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                  <svg
-                    className="w-3 h-3 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="3"
-                      d="M5 13l4 4L19 7"
-                    ></path>
-                  </svg>
-                </div>
-                <span className="text-gray-800 font-medium">
-                  Lorem Ipsum is simply dummy text of
-                </span>
-              </li>
+
             </ul>
           </div>
         </div>

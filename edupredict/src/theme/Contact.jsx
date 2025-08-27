@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import ContactSection from '../components/ContactSection'
+import StarBackground from '../components/StarBackground'
+import '../stylesheet/animations.css'
 
 function Contact() {
       const [formData, setFormData] = useState({
@@ -25,9 +27,36 @@ function Contact() {
     })
   }
    return (
-    <div className="w-full min-h-screen bg-white">
+    <div className="w-full min-h-screen">
+      <div className="animated-background">
+        {/* Enhanced floating shapes with light purple theme */}
+        <div className="floating-shape shape1"></div>
+        <div className="floating-shape shape2"></div>
+        <div className="floating-shape shape3"></div>
+        <div className="floating-shape shape4"></div>
+        <div className="floating-shape shape5"></div>
+        <div className="floating-shape shape6"></div>
+        {/* Educational themed icons */}
+        <div className="animated-icon book-icon"></div>
+        <div className="animated-icon graduation-icon"></div>
+        <div className="animated-icon lightbulb-icon"></div>
+        {/* Small purple particles */}
+        <div className="purple-particle particle-1"></div>
+        <div className="purple-particle particle-2"></div>
+        <div className="purple-particle particle-3"></div>
+        <div className="purple-particle particle-4"></div>
+        <div className="purple-particle particle-5"></div>
+        <div className="purple-particle particle-6"></div>
+        <div className="purple-particle particle-7"></div>
+        <div className="purple-particle particle-8"></div>
+        {/* Purple glowing areas */}
+        <div className="purple-glow glow-1"></div>
+        <div className="purple-glow glow-2"></div>
+        <div className="purple-glow glow-3"></div>
+      </div>
       <ContactSection />
-    <div className="w-full py-16 px-6 bg-white">
+       <StarBackground />
+    <div className="w-full py-16 px-6 ">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">

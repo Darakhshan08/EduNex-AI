@@ -7,25 +7,26 @@ function FeatureSection() {
  return (
     <div className="container mx-auto px-4 py-16 max-w-7xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
+         <div className="space-y-6">
           <div className="inline-block px-4 py-1 rounded-full bg-[#9078e2] text-white font-medium">
             Populer Subject
           </div>
           <h2 className="text-4xl font-bold text-black">
-            Provide It & Technol
+           Empowering Education with 
             <br />
-            Subject For You
+           AI & Predictive Insights
           </h2>
           <p className="text-gray-600">
-            Construction is a general term meaning the art and science to form
-            systems organizations, and comes from Latin Construction is
+           At EduNex AI, we harness the power of AI to transform learning into a smarter, 
+           data-driven experience. Our platform empowers educators with performance prediction tools that identify learning gaps before they become challenges. With detailed analytics and actionable insights,
+            teachers and institutions can make informed decisions that drive student success.
           </p>
           <div className="flex">
             <div className="w-1 bg-[#9078e2] mr-4"></div>
             <p className="text-gray-600">
-              Construction is a general term meaning the art and science to form
-              systems organizations, and comes from Latin Construction is a
-              organizations, and comes from Latin construction and Old
+             To ensure a seamless learning journey, EduPredict also provides 24/7 AI chatbot support, 
+             guiding students whenever they need assistance. Role-based access keeps the platform secure and personalized for educators, students,
+            and administrators—offering each the right tools and dashboards to achieve their goals with confidence.
             </p>
           </div>
           

@@ -7,6 +7,8 @@ import {
   TrendingUpIcon,
 } from 'lucide-react'
 import ContactSection from '../components/ContactSection'
+import StarBackground from '../components/StarBackground'
+import '../stylesheet/animations.css'
 export function About() {
     const sectionRef = useRef(null)
   const headingRef = useRef(null)
@@ -61,11 +63,37 @@ export function About() {
     return () => observer.disconnect()
   }, [])
   return (
-    <div className="w-full bg-white">
+    <div className="w-full">
+       <div className="animated-background">
+        {/* Enhanced floating shapes with light purple theme */}
+        <div className="floating-shape shape1"></div>
+        <div className="floating-shape shape2"></div>
+        <div className="floating-shape shape3"></div>
+        <div className="floating-shape shape4"></div>
+        <div className="floating-shape shape5"></div>
+        <div className="floating-shape shape6"></div>
+        {/* Educational themed icons */}
+        <div className="animated-icon book-icon"></div>
+        <div className="animated-icon graduation-icon"></div>
+        <div className="animated-icon lightbulb-icon"></div>
+        {/* Small purple particles */}
+        <div className="purple-particle particle-1"></div>
+        <div className="purple-particle particle-2"></div>
+        <div className="purple-particle particle-3"></div>
+        <div className="purple-particle particle-4"></div>
+        <div className="purple-particle particle-5"></div>
+        <div className="purple-particle particle-6"></div>
+        <div className="purple-particle particle-7"></div>
+        <div className="purple-particle particle-8"></div>
+        {/* Purple glowing areas */}
+        <div className="purple-glow glow-1"></div>
+        <div className="purple-glow glow-2"></div>
+        <div className="purple-glow glow-3"></div>
+      </div>
      <ContactSection />
-    
+      <StarBackground />
     <section
-      className="py-16 md:py-24 container mx-auto px-6 bg-gray-50"
+      className="py-16 md:py-24 container mx-auto px-6"
       ref={sectionRef}
     >
       <div
