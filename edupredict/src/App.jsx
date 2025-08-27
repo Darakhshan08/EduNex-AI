@@ -32,6 +32,7 @@ import Guestlayout from "./components/Custom/GuestLayout";
 import { About } from "./theme/About";
 import Contact from "./theme/Contact";
 import Home1 from "./theme/Home1";
+import { ChatbotProvider } from "./components/Chatbot/ChatbotContext";
 
 
 
@@ -52,6 +53,7 @@ export function App() {
   };
   return (
     <>
+     {/* <ChatbotProvider>          ✅ Wrap the entire app */}
       <BrowserRouter>
         <ToastContainer position="top-right" autoClose={3000} />
         <div className="flex flex-col h-screen">
@@ -254,6 +256,7 @@ export function App() {
           </AnimatePresence>
         </div>
       </BrowserRouter>
+     {/* </ChatbotProvider>  */}
     </>
   );
 }

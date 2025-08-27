@@ -9,7 +9,7 @@ function FeatureSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
          <div className="space-y-6">
           <div className="inline-block px-4 py-1 rounded-full bg-[#9078e2] text-white font-medium">
-            Populer Subject
+            Popular Subject
           </div>
           <h2 className="text-4xl font-bold text-black">
            Empowering Education with 

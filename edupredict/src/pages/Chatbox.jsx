@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -12,7 +13,7 @@ const Chatbot = () => {
   const [botTyping, setBotTyping] = useState(false);
   const scrollRef = useRef(null);
   const [userData, setUserData] = useState({
-    name: "S",
+    name: "",
     email: "",
     username: "",
     role: "",
@@ -84,6 +85,42 @@ const Chatbot = () => {
       setBotTyping(false);
     }
   };
+
+
+//   const handleSend = async () => {
+//   if (!input.trim()) return;
+
+//   // User message add karo
+//   const userMessage = { id: Date.now(), sender: "user", text: input };
+//   setMessages(prev => [...prev, userMessage]);
+//   setInput("");
+//   setBotTyping(true);
+
+//   try {
+//     // State se direct userData le lo
+//     const res = await axios.fetch("http://localhost:8000/api/chat", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ message: input, userData }), // <-- state se bhej rahe
+//     });
+
+//     console.log("Sending userData to backend:", userData);
+
+//     const data = await res.json();
+//     setMessages(prev => [
+//       ...prev,
+//       { id: Date.now() + 1, sender: "bot", text: data.reply },
+//     ]);
+//   } catch (err) {
+//     setMessages(prev => [
+//       ...prev,
+//       { id: Date.now() + 1, sender: "bot", text: "❌ Gemini API failed" },
+//     ]);
+//   } finally {
+//     setBotTyping(false);
+//   }
+// };
+
 
   // Auto-scroll
   useEffect(() => {
