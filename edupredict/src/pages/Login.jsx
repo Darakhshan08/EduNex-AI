@@ -242,8 +242,8 @@ const Login = () => {
       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
       whileFocus={{ scale: 1.01 }}
       required
-      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-      title="Please enter a valid email address (e.g. user@example.com)"
+      // pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+      // title="Please enter a valid email address (e.g. user@example.com)"
     />
   </motion.div>
 

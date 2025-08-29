@@ -262,7 +262,7 @@ const StudentHistory = () => {
           </button>
         </div>
       </div>
-      {data.stddata.length === 0 ? (
+      {data.stddata?.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
           <p className="text-gray-500">No history found. Complete an analysis to see results here.</p>
         </div>
@@ -283,7 +283,7 @@ const StudentHistory = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {data.stddata.map((item, index) => (
+                {data.stddata?.map((item, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap">{item.student_id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{item.Name}</td>

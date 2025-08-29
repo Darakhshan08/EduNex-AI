@@ -85,4 +85,4 @@ teacherRoutes.get("/data", protect(["teacher"]), (req, res) => {
     });
 });
 
-module.exports = teacherRoutes;
+module.exports = teacherRoutes;

@@ -84,13 +84,13 @@ const TeacherDashboard = () => {
     const teacherData = JSON.parse(tokenString);
     const token = teacherData.token;
     const url = month
-      ? `http://localhost:8000/api/teacher/data?month=${month}`
+      ?  `http://localhost:8000/api/teacher/data?month=${month}`
       : `http://localhost:8000/api/teacher/data`;
 
     setLoading(true);
     try {
       const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`},
       });
 
       setData(res.data); // data update
@@ -358,7 +358,7 @@ const TeacherDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {data.stddata.length > 0 ? (
+                {data.stddata?.length > 0 ? (
                   data.stddata.slice(0, 5).map((analysis, index) => (
                     <tr key={index}>
                       {/* Student ID */}
