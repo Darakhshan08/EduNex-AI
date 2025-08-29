@@ -5,7 +5,6 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { register } from '../Api/auth';
 import { Navigate, useNavigate } from 'react-router-dom';
-
 function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
