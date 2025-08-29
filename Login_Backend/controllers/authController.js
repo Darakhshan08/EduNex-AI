@@ -10,7 +10,7 @@ exports.register = async (req, res, next) => {
   const { error } = registerSchema.validate(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
 
-  const { name, email, password, role, student_id, courses } = req.body;
+  const { name, email, password, role, student_id, courses, batch_id } = req.body;
 
   try {
     const exist = await Users.findOne({ email });
@@ -26,6 +26,7 @@ exports.register = async (req, res, next) => {
       role,
       student_id: role === "student" ? student_id : undefined,
       courses: role === "teacher" ? courses : undefined,
+      batch_id: role === "teacher" ? batch_id : undefined,
     });
 
     res.status(201).json({ message: "Registered", data: newUser });
@@ -61,9 +62,12 @@ exports.login = async (req, res, next) => {
         id: user._id,
         email: user.email,
         name: user.name,
+        batch_id: user.batch_id,
+        courses: user.courses,
         role: user.role,
         isActive: user.isActive,
         lastLogin: user.lastLogin,
+        
       },
     });
   } catch (err) {

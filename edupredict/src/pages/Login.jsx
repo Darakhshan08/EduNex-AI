@@ -54,10 +54,16 @@ const Login = () => {
           JSON.stringify({ token, student, expiry })
         );
       } else if (role === "teacher") {
+        const { token, teacher } = response.data; // teacher object destructure
         localStorage.setItem(
           "teacher",
-          JSON.stringify({ token, courses, expiry })
-        );
+          JSON.stringify({
+            token,
+            batch_id: teacher?.batch_id,
+            courses: teacher?.courses,
+            expiry: Date.now() + 60 * 60 * 1000
+          })
+        );
       } else if (role === "admin") {
         localStorage.setItem("admin", JSON.stringify({ token, expiry }));
       }
@@ -256,13 +262,25 @@ const Login = () => {
     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
     whileFocus={{ scale: 1.01 }}
     required
-    minLength={6}
-    maxLength={20}
-    pattern="^(?=.*[A-Za-z])(?=.*[0-9]).{6,}$"
-    title="Password must be at least 6 characters long and contain at least one letter and one number"
+    // minLength={6}
+    // maxLength={20}
+    // pattern="^(?=.*[A-Za-z])(?=.*[0-9]).{6,}$"
+    // title="Password must be at least 6 characters long and contain at least one letter and one number"
   />
 </motion.div>
-
+{/* "Don't have an account? Register" link */}
+<motion.div variants={itemVariants} className="text-center mt-2">
+  <span className="text-gray-600 text-sm">
+    Don't have an account?{" "}
+    <button
+      type="button"
+      onClick={() => navigate("/register")} // or your page-switch logic
+      className="text-[#9078e2] font-medium hover:underline"
+    >
+      Register
+    </button>
+  </span>
+</motion.div>
             {/* Submit */}
             <motion.div variants={itemVariants}>
               <motion.button

@@ -10,6 +10,7 @@ const studentroute = require("./routes/studentRoutes");
 const datasetRoutes = require("./routes/datasetRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const bodyParser = require("body-parser");
+const teacherRoutes = require("./routes/teacherRoutes");
 
 
 require("dotenv").config();
@@ -34,7 +35,7 @@ app.use(express.json());
 
 
 app.use("/api/chat", chatRoutes);
-
+app.use('/api/teacher', teacherRoutes)
 app.use('/api/student', studentroute)
 app.use('/api/user', Userroute);
 app.use("/api/auth", authroutes);

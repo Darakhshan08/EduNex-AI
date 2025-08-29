@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import CountUp from "react-countup";
 import { motion } from "framer-motion";
 import StudentTop from "../components/Tabs/StudentTop";
 import { Link, useNavigate } from "react-router-dom";
@@ -27,55 +28,47 @@ const StudentDashboard = () => {
   const [student, setStudent] = useState(null);
   const [record, recordData] = useState([]);
   const [userData, setUserData] = useState({
-    name: '',
-    email: '',
-    username: '',
-    role: ''
+    name: "",
+    email: "",
+    username: "",
+    role: "",
   });
 
   function parseJwt(token) {
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const jsonPayload = decodeURIComponent(
         atob(base64)
-          .split('')
-          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
-          .join('')
+          .split("")
+          .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join("")
       );
       return JSON.parse(jsonPayload);
     } catch (error) {
       return null;
     }
   }
-  
 
   useEffect(() => {
-    const adminToken = localStorage.getItem('admin');
-    const teacherToken = localStorage.getItem('teacher');
-    const studentToken = localStorage.getItem('student');
-  
+    const adminToken = localStorage.getItem("admin");
+    const teacherToken = localStorage.getItem("teacher");
+    const studentToken = localStorage.getItem("student");
+
     const token = adminToken || teacherToken || studentToken;
-  
+
     if (token) {
       const decoded = parseJwt(token);
       if (decoded) {
         setUserData({
-          name: decoded.name || '',
-          email: decoded.email || '',
-          username: decoded.username || '',
-          role: decoded.role || ''
+          name: decoded.name || "",
+          email: decoded.email || "",
+          username: decoded.username || "",
+          role: decoded.role || "",
         });
       }
     }
   }, []);
-
-
-
-
-
-
-
 
   const attendanceData = async () => {
     setLoading(true);
@@ -105,11 +98,8 @@ const StudentDashboard = () => {
           avg_attendance: item.avg_attendance,
           avg_quizzes: item.avg_quizzes,
           avg_assignment: item.avg_assignment,
-          month: item.month
+          month: item.month,
         }));
-
-      
-
 
         recordData(chartData);
       }
@@ -160,7 +150,6 @@ const StudentDashboard = () => {
     dropData();
   }, []);
 
-
   // const quizData = async () => {
   //   try {
   //     const res = await axios.get("http://localhost:3001/quiz-summary");
@@ -175,14 +164,14 @@ const StudentDashboard = () => {
   //               t.teacher_name === item.teacher_name
   //           )
   //       );
-  
+
   //       // Format the data
   //       const format = unique.map((item) => ({
   //         course: item.course_id,
   //         teacher: item.teacher_name,
   //         quiz: item.quizzes_completed,
   //       }));
-  
+
   //       setData(format.slice(0, 4)); // Only first 7 unique records
   //     }
   //   } catch (error) {
@@ -191,45 +180,40 @@ const StudentDashboard = () => {
   //     setLoading(false);
   //   }
   // };
-  
+
   // useEffect(() => {
   //   quizData();
   // }, []);
-  
+
   useEffect(() => {
     const fetchStudent = async () => {
       try {
         const token = localStorage.getItem("student");
         if (!token) return;
-  
+
         const decoded = parseJwt(token); // 👈 token parse
         if (!decoded || !decoded.student_id) return;
-  
+
         const res = await axios.get(
           `http://localhost:8000/api/student/${decoded.student_id}`, // backend me student_id ke basis pe fetch
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-  
+
         if (res.data && res.data.data) {
           setStudent(res.data.data); // object assign karo
         }
-  
+
         console.log("Decoded token:", decoded);
         console.log("Student data:", res.data);
       } catch (error) {
         console.error("Error fetching student data:", error);
       }
     };
-  
+
     fetchStudent();
   }, []);
-  
-  
-
-
-
 
   const fetchData = async () => {
     setLoading(true);
@@ -287,83 +271,192 @@ const StudentDashboard = () => {
         initial="hidden"
         animate="visible"
       >
-       <motion.div
-  variants={itemVariants}
-  className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-indigo-50 to-white shadow-sm border border-gray-100"
->
-  <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
-    Welcome,{" "}
-    <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-      {userData.name}
-    </span>{" "}
-    👋
-  </h1>
+        <motion.div
+          variants={itemVariants}
+          className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-indigo-50 to-white shadow-sm border border-gray-100"
+        >
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+            Welcome,{" "}
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+              {userData.name}
+            </span>{" "}
+            👋
+          </h1>
 
-  <p className="text-gray-600 text-lg leading-relaxed">
-    🎓 Ready to take control of your learning journey?  
-    This is your <span className="font-semibold text-indigo-600">Student Dashboard</span>,  
-    where progress meets opportunity 🚀
-  </p>
-</motion.div>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            🎓 Ready to take control of your learning journey? This is your{" "}
+            <span className="font-semibold text-indigo-600">
+              Student Dashboard
+            </span>
+            , where progress meets opportunity 🚀
+          </p>
+        </motion.div>
+     
 
-<motion.div
-    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6"
-    initial="hidden"
-    animate="visible"
-    variants={{
-      hidden: { opacity: 0 },
-      visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
-    }}
-  >
-    <motion.div
-      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
-      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-    >
-      <div className="flex items-center gap-3 mb-2">
-        <NotepadText size={32} className="text-[#9078e2]" />
-        <div className="text-md text-gray-600">Quizzes</div>
-      </div>
-      <div className="text-3xl font-bold text-[#333333]"> {student ? student.quizzes_completed : "--"}</div>
-    </motion.div>
-  
-    <motion.div
-      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
-      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-    >
-      <div className="flex items-center gap-3 mb-2">
-      <CalendarClock size={32} className="text-[#9078e2]" />
-        <div className="text-md text-gray-600">Attendance</div>
-      </div>
-      <div className="text-3xl font-bold text-[#333333]"> {student ? student.attendance_percentage + "%" : "--"}</div>
-    </motion.div>
-  
-    <motion.div
-      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
-      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-    >
-      <div className="flex items-center gap-3 mb-2">
-        <XCircleIcon size={30} className="text-[#9078e2]" />
-        <div className="text-md text-gray-600">Gpa</div>
-      </div>
-      <div className="text-3xl font-bold text-[#333333]">{student ? student.gpa : "--"}</div>
-    </motion.div>
-  
-    <motion.div
-      className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
-      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-    >
-      <div className="flex items-center gap-3 mb-2">
-        <Award size={30} className="text-[#9078e2]" />
-        <div className="text-md text-gray-600">Assignment</div>
-      </div>
-      <div className="text-3xl font-bold text-[#333333]"> {student ? student.assignments_completed : "--"}</div>
-    </motion.div>
-  </motion.div>
-      
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
+          }}
+        >
+          <motion.div
+            className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <NotepadText size={32} className="text-[#9078e2]" />
+              <div className="text-md text-gray-600">Quizzes</div>
+            </div>
+            <div className="text-3xl font-bold text-[#333333]">
+              <CountUp
+                end={student ? student.quizzes_completed : "--"}
+                duration={5}
+                separator=","
+              />
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <CalendarClock size={32} className="text-[#9078e2]" />
+              <div className="text-md text-gray-600">Attendance</div>
+            </div>
+            <div className="text-3xl font-bold text-[#333333]">
+              <CountUp
+                end={student ? student.attendance_percentage : 0} // number
+                duration={5}
+                separator=","
+                decimals={1} // agar decimal chahiye
+                suffix="%" // yahan % add hoga
+              />
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <XCircleIcon size={30} className="text-[#9078e2]" />
+              <div className="text-md text-gray-600">Gpa</div>
+            </div>
+            <div className="text-3xl font-bold text-[#333333]">
+              <CountUp
+                end={student ? student.gpa : "--"} // number
+                duration={5}
+                separator=","
+              />
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="bg-white rounded-xl shadow-md p-5 border-l-4 border-[#9078e2] hover:shadow-lg transition-all duration-300"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Award size={30} className="text-[#9078e2]" />
+              <div className="text-md text-gray-600">Assignment</div>
+            </div>
+            <div className="text-3xl font-bold text-[#333333]">
+            
+              <CountUp
+                end={student ? student.assignments_completed : "--"} // number
+                duration={5}
+                separator=","
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+
+
+        <motion.div
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 lg:col-span-2 gap-4 mb-6"
+            variants={itemVariants}
+          >
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <span className="inline-block w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>
+              Your Progress
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <motion.div
+                className="p-4 bg-emerald-50 rounded-lg border border-emerald-100"
+                whileHover={{
+                  y: -5,
+                  transition: {
+                    duration: 0.2,
+                  },
+                }}
+              >
+                <div className="text-emerald-800 font-semibold mb-1">
+                  Dropout_Risk
+                </div>
+                <div className="text-3xl font-bold text-emerald-600">
+                  {student ? student.dropout_risk : "--"}
+                </div>
+              </motion.div>
+              <motion.div
+                className="p-4 bg-blue-50 rounded-lg border border-blue-100"
+                whileHover={{
+                  y: -5,
+                  transition: {
+                    duration: 0.2,
+                  },
+                }}
+              >
+                <div className="text-blue-800 font-semibold mb-1">
+                  Student Performance
+                </div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {student ? student.predicted_performance : "--"}
+                </div>
+              </motion.div>
+              <motion.div
+                className="p-4 bg-purple-50 rounded-lg border border-purple-100"
+                whileHover={{
+                  y: -5,
+                  transition: {
+                    duration: 0.2,
+                  },
+                }}
+              >
+                <div className="text-purple-800 font-semibold mb-1">
+                  LMS Engagement Score
+                </div>
+                <div className="text-3xl font-bold text-purple-600">
+                <CountUp
+                end={student ? student.lms_engagement_score : "--"}// number
+                duration={5}
+                separator=","
+                suffix="%"
+              />
+                 
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+
 
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -386,7 +479,12 @@ const StudentDashboard = () => {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" domain={[0, 80]} />
-                <YAxis type="category" dataKey="course" width={100} tick={{ fontSize: 15 }} />
+                <YAxis
+                  type="category"
+                  dataKey="course"
+                  width={100}
+                  tick={{ fontSize: 15 }}
+                />
                 <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
                 <Bar
                   dataKey="avg_attendance" // show only avg attendance
@@ -477,9 +575,6 @@ const StudentDashboard = () => {
   </motion.div> */}
           </motion.div>
 
-
-
-
           <motion.div
             className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             initial={{ opacity: 0, y: 20 }}
@@ -497,7 +592,12 @@ const StudentDashboard = () => {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" domain={[0, 45]} />
-                <YAxis type="category" dataKey="course" width={100} tick={{ fontSize: 15 }} />
+                <YAxis
+                  type="category"
+                  dataKey="course"
+                  width={100}
+                  tick={{ fontSize: 15 }}
+                />
                 <Tooltip />
                 <Bar
                   dataKey="avg_quizzes" // show only avg attendance
@@ -526,7 +626,6 @@ const StudentDashboard = () => {
             </motion.div> */}
           </motion.div>
 
-
           <motion.div
             className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             initial={{ opacity: 0, y: 20 }}
@@ -543,8 +642,13 @@ const StudentDashboard = () => {
                 layout="vertical"
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 'dataMax + 5']} />
-                <YAxis type="category" dataKey="course" width={100} tick={{ fontSize: 15 }} />
+                <XAxis type="number" domain={[0, "dataMax + 5"]} />
+                <YAxis
+                  type="category"
+                  dataKey="course"
+                  width={100}
+                  tick={{ fontSize: 15 }}
+                />
                 <Tooltip />
                 <Bar
                   dataKey="avg_assignment" // show only avg attendance
@@ -572,10 +676,6 @@ const StudentDashboard = () => {
               </motion.button>
             </motion.div> */}
           </motion.div>
-
-
-
-
 
           {/* <motion.div
             className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
@@ -638,12 +738,6 @@ const StudentDashboard = () => {
     </motion.button>
   </motion.div>
           </motion.div> */}
-
-
-
-
-
-
 
           {/* <motion.div
           className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
@@ -714,62 +808,7 @@ const StudentDashboard = () => {
             </motion.button>
           </motion.div>
         </motion.div> */}
-          <motion.div
-            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 lg:col-span-2"
-            variants={itemVariants}
-          >
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <span className="inline-block w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>
-              Your Progress
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <motion.div
-                className="p-4 bg-emerald-50 rounded-lg border border-emerald-100"
-                whileHover={{
-                  y: -5,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
-              >
-                <div className="text-emerald-800 font-semibold mb-1">
-                  Dropout_Risk
-                </div>
-                <div className="text-3xl font-bold text-emerald-600">{student ? student.dropout_risk : "--"}</div>
-               
-              </motion.div>
-              <motion.div
-                className="p-4 bg-blue-50 rounded-lg border border-blue-100"
-                whileHover={{
-                  y: -5,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
-              >
-                <div className="text-blue-800 font-semibold mb-1">
-                 Student Performance
-                </div>
-                <div className="text-2xl font-bold text-blue-600">{student ? student.predicted_performance : "--"}</div>
-                
-              </motion.div>
-              <motion.div
-                className="p-4 bg-purple-50 rounded-lg border border-purple-100"
-                whileHover={{
-                  y: -5,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
-              >
-                <div className="text-purple-800 font-semibold mb-1">
-                  LMS Engagement Score
-                </div>
-                <div className="text-3xl font-bold text-purple-600">{student ? student.lms_engagement_score : "--"}%</div>
-                
-              </motion.div>
-            </div>
-          </motion.div>
+         
         </motion.div>
       </motion.div>
     </>

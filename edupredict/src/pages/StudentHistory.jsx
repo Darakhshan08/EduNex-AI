@@ -3,11 +3,113 @@ import { Link } from 'react-router-dom';
 import { ArrowLeftIcon, DownloadIcon, SearchIcon, TrashIcon } from 'lucide-react';
 import axios from 'axios';
 
+
+function parseJwt(token) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    return null;
+  }
+}
+
+
+
+
 const StudentHistory = () => {
   const [students, setStudents] = useState([]);
   const [historyData, setHistoryData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [months, setMonths] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [data, setData] = useState({
+    batch_id: "",
+    course: "",
+    months: [],
+    selectedMonth: "",
+    totalRecords: 0,
+    AverageAttendance: "",
+    AverageAssignments: "",
+    AverageQuizzes: "",
+    stddata: [],
+  });
+  const [userData, setUserData] = useState({
+    name: "",
+    batch_id: "",
+    courses: "",
+  });
+
+  console.log(userData);
+  // ===== Get teacher info from token =====
+  // ===== Load user info from localStorage =====
+  useEffect(() => {
+    const tokenString = localStorage.getItem("teacher");
+
+    if (!tokenString) return;
+
+    const teacherData = JSON.parse(tokenString);
+    const decoded = parseJwt(teacherData.token);
+    if (!decoded) return;
+
+    setUserData({
+      name: decoded.name,
+      batch_id: decoded.batch_id,
+      courses: decoded.courses,
+    });
+  }, []);
+  // ===== Fetch teacher data =====
+  // ===== Fetch Teacher Data =====
+  // Fetch data
+  const fetchTeacherData = async (month = "") => {
+    const tokenString = localStorage.getItem("teacher");
+    if (!tokenString) return console.error("No token found!");
+
+    const teacherData = JSON.parse(tokenString);
+    const token = teacherData.token;
+    const url = month
+      ? `http://localhost:8000/api/teacher/data?month=${month}`
+      : `http://localhost:8000/api/teacher/data`;
+
+    setLoading(true);
+    try {
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setData(res.data); // data update
+      console.log(data);
+      setMonths(res.data.months || []);
+      setSelectedMonth(month); // selected month update
+      console.log("Fetched data:", res.data); // sahi jagah console.log
+    } catch (err) {
+      console.error("API Error:", err.response?.data || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ===== Fetch once userData loaded =====
+  useEffect(() => {
+    if (userData?.name) fetchTeacherData();
+  }, [userData]);
+
+  // Handle month change
+  const handleMonthChange = (e) => {
+    const month = e.target.value;
+    setSelectedMonth(month);
+    fetchTeacherData(month); // month = "" -> all records
+  };
+
+
 
   // Load history from localStorage on component mount
   // 1️⃣ Fetch student history from backend
@@ -35,14 +137,14 @@ const StudentHistory = () => {
     setSearchTerm(term);
 
     if (term.trim() === "") {
-      setFilteredData(students);
+      setData(data);
     } else {
-      const filtered = students.filter(
+      const filtered = data.filter(
         (item) =>
-          item.name.toLowerCase().includes(term) ||
+          item.Name.toLowerCase().includes(term) ||
           item.student_id.toLowerCase().includes(term)
       );
-      setFilteredData(filtered);
+      setData(filtered);
     }
   };
 
@@ -80,11 +182,21 @@ const StudentHistory = () => {
     }
   };
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+  const formatTime = (timeString) => {
+    if (!timeString) return "-";
+  
+    // Agar "22:32.9" type string hai
+    const [hours, rest] = timeString.split(":");
+    const [minutes, seconds] = rest.split(".");
+    
+    // 24-hour se 12-hour format (optional)
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const hh = h % 12 === 0 ? 12 : h % 12;
+  
+    return `${hh.toString().padStart(2,"0")}:${minutes.padStart(2,"0")} ${ampm}`;
   };
+  
 
   // Clear all history
   const clearHistory = () => {
@@ -104,7 +216,7 @@ const StudentHistory = () => {
         </Link>
       </div>
       <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-2 items-start sm:items-center mb-4">
-      <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Student Analysis History</h1>
+      <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Student History</h1>
       <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
           <div className="relative">
             <input
@@ -116,6 +228,32 @@ const StudentHistory = () => {
             />
             <SearchIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
+
+          <div className="relative">
+          <select
+              value={selectedMonth}
+              onChange={handleMonthChange}
+              className="appearance-none w-full sm:w-auto bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#9078e2] transition"
+            >
+             
+              {months.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg
+                      className="fill-current h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                
+                </div>
+
           <button 
             onClick={handleDownload}
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
@@ -124,7 +262,7 @@ const StudentHistory = () => {
           </button>
         </div>
       </div>
-      {filteredData.length === 0 ? (
+      {data.stddata.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
           <p className="text-gray-500">No history found. Complete an analysis to see results here.</p>
         </div>
@@ -136,19 +274,20 @@ const StudentHistory = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Analyzed</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GPA</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dropout Risk</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
                   {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th> */}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((item, index) => (
+                {data.stddata.map((item, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap">{item.student_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{formatDate(item.created_at)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{item.Name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{item.month}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{item.gpa}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -170,6 +309,7 @@ const StudentHistory = () => {
                         {item.dropout_risk}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{formatTime(item.timestamp)}</td>
                     {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800">
                       <Link to="/student-analysis">View Details</Link>
                     </td> */}

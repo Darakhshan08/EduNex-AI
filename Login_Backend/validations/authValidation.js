@@ -10,6 +10,11 @@ exports.registerSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),
+  batch_id: Joi.string().when("role", {
+    is: "teacher",
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   courses: Joi.string().when("role", {
     is: "teacher",
     then: Joi.required(),

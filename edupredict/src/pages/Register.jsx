@@ -4,8 +4,10 @@ import { BookOpenIcon, GraduationCapIcon, UserIcon } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { register } from '../Api/auth';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 function Register() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +15,7 @@ function Register() {
     role: '',
     student_id: '',
     courses: '',
+    batch_id: '',
   });
 
   const handleChange = (e) => {
@@ -33,6 +36,7 @@ function Register() {
       role: formData.role,
       ...(formData.role === 'student' && { student_id: formData.student_id }),
       ...(formData.role === 'teacher' && formData.courses.trim() && { courses: formData.courses.trim() }),
+      ...(formData.role === 'teacher' && formData.batch_id.trim() && { batch_id: formData.batch_id.trim() }),
     };
 
     try {
@@ -40,6 +44,7 @@ function Register() {
 
       if (res?.status === 201) {
         toast.success('Account created successfully!');
+        navigate("/login");
         setFormData({
           name: '',
           email: '',
@@ -47,6 +52,7 @@ function Register() {
           role: '',
           student_id: '',
           courses: '',
+          batch_id: ''
         });
       } else {
         toast.error(res?.data?.error || res?.data?.message || 'Registration failed.');
@@ -143,8 +149,8 @@ function Register() {
       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
       placeholder="Enter your full name"
       required
-      pattern="^[A-Za-z\s]"
-      title="Name should be 3-50 characters long and contain only letters."
+      // pattern="^[A-Za-z\s]"
+      // title="Name should be 3-50 characters long and contain only letters."
     />
   </div>
 
@@ -175,8 +181,8 @@ function Register() {
       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
       placeholder="Create a password"
       required
-      pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$"
-      title="Password must be at least 6 characters, include one uppercase letter, one number, and one special character."
+      // pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$"
+      // title="Password must be at least 6 characters, include one uppercase letter, one number, and one special character."
     />
   </div>
 
@@ -221,8 +227,24 @@ function Register() {
     </div>
   )}
 
-  {formData.role === 'teacher' && (
-    <div>
+{formData.role === 'teacher' && (
+  <div className="flex gap-4">
+    {/* Batch ID */}
+    <div className="flex-1">
+      <label className="block text-gray-700 font-medium mb-2">Batch ID</label>
+      <input
+        type="text"
+        name="batch_id"
+        value={formData.batch_id}
+        onChange={handleChange}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
+        placeholder="Enter Your Batch ID"
+        required
+      />
+    </div>
+
+    {/* Course */}
+    <div className="flex-1">
       <label className="block text-gray-700 font-medium mb-2">Course</label>
       <input
         type="text"
@@ -232,11 +254,12 @@ function Register() {
         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9078e2]"
         placeholder="Course you teach"
         required
-        pattern="^[A-Za-z\s]{3,50}$"
-        title="Course name should be 3-50 letters."
       />
     </div>
-  )}
+  </div>
+)}
+
+{/* "Don't have an account? Register" link */}
 
   {/* Submit */}
   <button

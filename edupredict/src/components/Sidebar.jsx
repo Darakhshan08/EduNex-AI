@@ -109,7 +109,7 @@ const Sidebar = () => {
       localStorage.removeItem("teacher");
       localStorage.removeItem("student");
 
-      navigate("/");
+      navigate("/login");
       window.location.reload();
     } catch (err) {
       console.error("Logout error:", err.message);
@@ -216,6 +216,56 @@ const Sidebar = () => {
                     User Management
                   </NavLink>
                 </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/studentattendance"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <CalendarClock size={30} />
+                    {open && <span>Attendance</span>}
+                  </NavLink>
+                </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/studentquiz"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <NotepadText size={30} />
+                    {open && <span>Quiz</span>}
+                  </NavLink>
+                </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/assignment"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <Award size={30} />
+                    {open && <span>Assignment</span>}
+                  </NavLink>
+                </motion.li>
+
+
+
+
+
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/dataset"
@@ -455,22 +505,7 @@ const Sidebar = () => {
                 </motion.li>
                 <motion.li variants={itemVariants}>
                   <NavLink
-                    to="/studentattendance"
-                    className={({ isActive }) =>
-                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
-                        ? "sidebar-link-active font-bold"
-                        : "hover:bg-gray-100"
-                      }`
-                    }
-                  >
-                    <CalendarClock size={30} />
-                    {open && <span>Attendance</span>}
-                  </NavLink>
-                </motion.li>
-
-                <motion.li variants={itemVariants}>
-                  <NavLink
-                    to="/studentquiz"
+                    to="/teacherquiz"
                     className={({ isActive }) =>
                       `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
                         ? "sidebar-link-active font-bold"
@@ -483,20 +518,6 @@ const Sidebar = () => {
                   </NavLink>
                 </motion.li>
 
-                <motion.li variants={itemVariants}>
-                  <NavLink
-                    to="/assignment"
-                    className={({ isActive }) =>
-                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
-                        ? "sidebar-link-active font-bold"
-                        : "hover:bg-gray-100"
-                      }`
-                    }
-                  >
-                    <Award size={30} />
-                    {open && <span>Assignment</span>}
-                  </NavLink>
-                </motion.li>
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/dropout"

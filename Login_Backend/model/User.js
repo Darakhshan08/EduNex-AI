@@ -29,6 +29,9 @@ const UserSchema = new Schema({
   courses: {
     type: String,
   },
+  batch_id: {
+    type: String,
+  },
 
   // ✅ NEW FIELDS
   isActive: {

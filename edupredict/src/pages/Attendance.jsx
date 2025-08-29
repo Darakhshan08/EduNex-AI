@@ -422,15 +422,20 @@ const Attendance = () => {
                       <td className="px-4 py-3">{student.student_name}</td>
                       <td className="px-4 py-3">{student.course}</td>
                       <td className="px-4 py-3">
-                        {student.status === "Present" ? (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            Present
-                          </span>
-                        ) : (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                            Absent
-                          </span>
-                        )}
+                      {student.status === "Present" ? (
+  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+    Present
+  </span>
+) : student.status === "Absent" ? (
+  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+    Absent
+  </span>
+) : student.status === "Late" ? (
+  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+    Late
+  </span>
+) : null}
+
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-500">
                         {student.time}

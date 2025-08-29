@@ -33,6 +33,7 @@ import { About } from "./theme/About";
 import Contact from "./theme/Contact";
 import Home1 from "./theme/Home1";
 import { ChatbotProvider } from "./components/Chatbot/ChatbotContext";
+import TeacherQuiz from "./pages/teacherquiz";
 
 
 
@@ -73,6 +74,30 @@ export function App() {
                   element={
                     <AuthLayout token={"admin"}>
                       <Attendance />
+                    </AuthLayout>
+                  }
+                />
+                      <Route
+                  path="/studentattendance"
+                  element={
+                    <AuthLayout token={"admin"}>
+                      <StudentAttendance />
+                    </AuthLayout>
+                  }
+                />
+                <Route
+                  path="/studentquiz"
+                  element={
+                    <AuthLayout token={"admin"}>
+                      <Quiz />
+                    </AuthLayout>
+                  }
+                />
+                <Route
+                  path="/assignment"
+                  element={
+                    <AuthLayout token={"admin"}>
+                      <Assignment />
                     </AuthLayout>
                   }
                 />
@@ -182,30 +207,7 @@ export function App() {
                     </AuthLayout>
                   }
                 />
-                 <Route
-                  path="/studentattendance"
-                  element={
-                    <AuthLayout token={"teacher"}>
-                      <StudentAttendance />
-                    </AuthLayout>
-                  }
-                />
-                <Route
-                  path="/studentquiz"
-                  element={
-                    <AuthLayout token={"teacher"}>
-                      <Quiz />
-                    </AuthLayout>
-                  }
-                />
-                <Route
-                  path="/assignment"
-                  element={
-                    <AuthLayout token={"teacher"}>
-                      <Assignment />
-                    </AuthLayout>
-                  }
-                />
+           
 
                 <Route
                   path="/stdperformance"
@@ -221,6 +223,14 @@ export function App() {
                   element={
                     <AuthLayout token={"teacher"}>
                       <Course_demand />
+                    </AuthLayout>
+                  }
+                />
+                  <Route
+                  path="/teacherquiz"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <TeacherQuiz />
                     </AuthLayout>
                   }
                 />
