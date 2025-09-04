@@ -35,7 +35,7 @@ function Herosection() {
           }}
         />
         <img
-          src="https://cdn-icons-png.flaticon.com/512/2228/2228105.png"
+          src="https://cdn-icons-png.flaticon.com/512/2228/2228104.png"
           alt=""
           className="absolute bottom-32 right-32 w-12 h-12 opacity-20 animate-pulse"
           style={{
@@ -154,7 +154,7 @@ function Herosection() {
               className="absolute top-1/2 -left-10 w-14 h-14 z-20 animate-float-diagonal"
             />
             <img
-              src="https://cdn-icons-png.flaticon.com/512/3313/3313486.png"
+              src="https://cdn-icons-png.flaticon.com/512/2228/2228104.png"
               alt="Lightbulb"
               className="absolute -top-10 right-1/3 w-12 h-12 z-20 animate-pulse-and-rotate"
             />

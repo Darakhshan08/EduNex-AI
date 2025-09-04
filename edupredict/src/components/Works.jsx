@@ -13,7 +13,7 @@ function Works() {
       number: 1,
       title: 'Create Your Account',
       description:
-        'Set up your virtual classroom and invite students to join with a simple code.',
+        'Set up your account and invite students to join with a simple code.',
       icon: <BookOpenIcon className="w-6 h-6" />,
     },
     {

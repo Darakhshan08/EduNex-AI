@@ -1,4 +1,3 @@
-
 // // components/Chatbot.jsx
 // import React, { useState, useEffect, useRef } from "react";
 // import { Send } from "lucide-react";
@@ -28,7 +27,7 @@
 //       const jsonPayload = decodeURIComponent(
 //         atob(base64)
 //           .split("")
-//           .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+//           .map((c) => %${("00" + c.charCodeAt(0).toString(16)).slice(-2)})
 //           .join("")
 //       );
 //       return JSON.parse(jsonPayload);
@@ -490,14 +489,16 @@ const handleSend = async () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
             transition={{ duration: 0.3 }}
-            className="mt-3 w-96 h-[600px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border"
+            className="mt-3 w-80 sm:w-96 h-[550px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-3 flex justify-between items-center">
+            <div className="bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md">
+
               <div>
-                <h2 className="font-bold text-lg flex items-center gap-1">
-                  EduNex AI <span>🤖</span>
-                </h2>
+              <h2 className="font-bold text-lg flex items-center gap-2">
+                EduNex AI <span className="animate-pulse">🤖</span>
+              </h2>
+
                 <div className="flex gap-2 text-xs mt-1">
                   <span className="bg-white/20 px-2 rounded-full">
                     {userData.role || "Guest"}
@@ -520,10 +521,11 @@ const handleSend = async () => {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="text-white text-lg"
+                className="text-white text-xl font-bold hover:text-gray-200 transition"
               >
                 ✖
               </button>
+
             </div>
 
             {/* Quick Actions */}
@@ -549,9 +551,10 @@ const handleSend = async () => {
             )}
 
             {/* Messages */}
-            <div
+              {/* Messages */}
+              <div
               ref={scrollRef}
-              className="flex-1 p-3 overflow-y-auto bg-gradient-to-b from-gray-50 to-gray-100 space-y-3"
+              className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-gray-100"
             >
               {messages.map((msg) => (
                 <motion.div
@@ -563,50 +566,67 @@ const handleSend = async () => {
                     msg.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
+
                   {msg.sender === "bot" && (
-                    <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center mr-2">
+                    <div className="w-9 h-9 bg-[#c4bef0] text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md">
                       🤖
                     </div>
                   )}
-                  <div
-                    className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm shadow ${
+
+<div
+                    className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow ${
                       msg.sender === "user"
-                        ? "bg-indigo-500 text-white rounded-br-none"
-                        : "bg-white text-gray-800 border rounded-bl-none"
+                        ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
+                        : "bg-white text-gray-800 rounded-bl-none"
                     }`}
-                    style={{ whiteSpace: "pre-line" }}
                   >
                     {msg.text}
                   </div>
+                  {msg.sender === "user" && (
+                    <div className="w-9 h-9 bg-[#9078e2] text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md">
+                      {userData?.name?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+
                 </motion.div>
               ))}
-              {botTyping && (
-                <div className="flex gap-2 items-center">
-                  <div className="w-7 h-7 bg-indigo-400 text-white rounded-full flex items-center justify-center">
+                       {/* Typing Indicator */}
+                {botTyping && (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center">
                     🤖
                   </div>
-                  <div className="bg-white px-3 py-2 rounded-2xl shadow">
-                    <span className="animate-bounce">● ● ●</span>
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></span>
                   </div>
                 </div>
               )}
+
             </div>
 
             {/* Input */}
-            <div className="flex items-center border-t p-2">
+            <div className="p-3 border-t border-gray-200 flex items-center gap-2 bg-white">
+
               <input
+                type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none"
+                placeholder="Type Your Message"
+                className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9078e2] bg-gray-50 text-sm"
               />
-              <button
+
+<motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSend}
-                className="ml-2 bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-full"
+                className="bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white p-3 rounded-full shadow hover:shadow-lg transition"
               >
-                <Send className="w-4 h-4" />
-              </button>
+                <Send className="w-5 h-5" />
+              </motion.button>
+
             </div>
           </motion.div>
         )}
@@ -616,4 +636,3 @@ const handleSend = async () => {
 };
 
 export default Chatbot;
-

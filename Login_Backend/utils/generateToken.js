@@ -12,7 +12,7 @@ const generateToken = (user) => {
       courses: user.courses
     },
     "your_jwt_secret", // you should replace this with process.env.JWT_SECRET in production
-    { expiresIn: "1h" } 
+    { expiresIn: "7d" } 
   );
 };
 

@@ -9,12 +9,7 @@ function Card({ icon, title, description }) {
       <p className="text-gray-600 mb-4 group-hover:text-white/90">
         {description}
       </p>
-      <a
-        href="#"
-        className="text-[#9078e2] font-medium hover:underline group-hover:text-white"
-      >
-        View Subject →
-      </a>
+     
     </div>
   )
 }

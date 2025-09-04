@@ -361,13 +361,13 @@ function Dataset() {
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
       {/* Header */}
-      <div className="flex justify-between items-center border-b p-4">
-        <h3 className="text-lg font-medium text-gray-900">
+      <div className="flex justify-between bg-[#9078e2] items-center border-b p-4">
+        <h3 className="text-lg font-medium text-white">
           Prediction Results
         </h3>
         <button
           onClick={() => setShowPredictionPopup(false)}
-          className="text-gray-400 hover:text-gray-500"
+          className="text-white hover:text-[#9078e2]"
         >
           <XIcon size={20} />
         </button>
@@ -381,7 +381,7 @@ function Dataset() {
             {Object.entries(predictionResult).map(([key, value], index) => (
               <tr
                 key={index}
-                className={index % 2 === 0 ? "bg-gray-50" : ""}
+                className={index % 2 === 0 ? "bg-[#f1eff9]" : ""}
               >
                 <td className="py-2 px-3 text-sm font-medium text-gray-700">
                   {key}

@@ -72,6 +72,21 @@ export const perform_attendance_trend_analysis = async (limit) => {
   return response;
 };
 
+// -------------------------------------------
+export const fetch_teacher_analytics = async (token) => {
+  let response;
+  try {
+    response = await api.get(`/teacher/analytics`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ Token include
+      },
+    });
+  } catch (error) {
+    return error;
+  }
+  return response;
+};
+
 export const attendance_course_performance = async () => {
   let response;
   try {

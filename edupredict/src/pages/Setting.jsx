@@ -85,13 +85,26 @@ const Setting = () => {
       return;
     }
 
-    const token = localStorage.getItem('admin');
+    const adminToken = localStorage.getItem('admin');
+    const teacherToken = localStorage.getItem('teacher');
+    const studentToken = localStorage.getItem('student');
+  
+    const token = adminToken || teacherToken || studentToken;
     if (!token) {
       toast.error('You are not logged in.');
       return;
     }
 
     try {
+      const adminToken = localStorage.getItem('admin');
+      const teacherToken = localStorage.getItem('teacher');
+      const studentToken = localStorage.getItem('student');
+      const tokenString = adminToken || teacherToken || studentToken;
+
+  if (!tokenString) return console.error("No token found!");
+
+  const adminData = JSON.parse(tokenString); 
+  const token = adminData.token;
       const response = await axios.put(
         'http://localhost:8000/api/auth/changepassword',
         {
@@ -205,7 +218,7 @@ const Setting = () => {
                         [field]: e.target.value
                       }))
                     }
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg pr-10"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-[#9078e2] focus:border-[#9078e2] transition-all"
                   />
                   <button
                     type="button"

@@ -34,7 +34,8 @@ import Contact from "./theme/Contact";
 import Home1 from "./theme/Home1";
 import { ChatbotProvider } from "./components/Chatbot/ChatbotContext";
 import TeacherQuiz from "./pages/teacherquiz";
-
+import Teacherattendance from "./pages/Teacherattendance";
+import TeacherAssignment from "./pages/TeacherAssignment";
 
 
 export function App() {
@@ -196,6 +197,30 @@ export function App() {
                   element={
                     <AuthLayout token={"teacher"}>
                       <TeacherDashboard />
+                    </AuthLayout>
+                  }
+                />
+                <Route
+                  path="/teacherquiz"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <TeacherQuiz />
+                    </AuthLayout>
+                  }
+                />
+                  <Route
+                  path="/teacherattendence"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <Teacherattendance />
+                    </AuthLayout>
+                  }
+                />
+                  <Route
+                  path="/teacherassignment"
+                  element={
+                    <AuthLayout token={"teacher"}>
+                      <TeacherAssignment />
                     </AuthLayout>
                   }
                 />

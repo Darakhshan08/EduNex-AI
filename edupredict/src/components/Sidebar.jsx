@@ -503,6 +503,22 @@ const Sidebar = () => {
                     {open && <span>Dashboard</span>}
                   </NavLink>
                 </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/teacherattendence"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <CalendarClock size={30} />
+                    {open && <span>Attendance</span>}
+                  </NavLink>
+                </motion.li>
+
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/teacherquiz"
@@ -518,6 +534,20 @@ const Sidebar = () => {
                   </NavLink>
                 </motion.li>
 
+                <motion.li variants={itemVariants}>
+                  <NavLink
+                    to="/teacherassignment"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3.5 p-2.5 rounded-lg transition-all ${isActive
+                        ? "sidebar-link-active font-bold"
+                        : "hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <Award size={30} />
+                    {open && <span>Assignment</span>}
+                  </NavLink>
+                </motion.li>
                 <motion.li variants={itemVariants}>
                   <NavLink
                     to="/dropout"
@@ -563,7 +593,7 @@ const Sidebar = () => {
                   </NavLink>
                 </motion.li>
 
-                <motion.li variants={itemVariants}>
+                {/* <motion.li variants={itemVariants}>
                   <NavLink
                     to="/feedbackteac"
                     className={({ isActive }) =>
@@ -576,7 +606,7 @@ const Sidebar = () => {
                     <MessageSquare size={30} />
                     {open && <span>Feedback</span>}
                   </NavLink>
-                </motion.li>
+                </motion.li> */}
 
                 <motion.li variants={itemVariants}>
                   <NavLink

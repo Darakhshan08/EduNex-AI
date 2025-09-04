@@ -399,7 +399,7 @@ const StudentDashboard = () => {
               <span className="inline-block w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>
               Your Progress
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <motion.div
                 className="p-4 bg-emerald-50 rounded-lg border border-emerald-100"
                 whileHover={{
@@ -430,6 +430,22 @@ const StudentDashboard = () => {
                 </div>
                 <div className="text-2xl font-bold text-blue-600">
                   {student ? student.predicted_performance : "--"}
+                </div>
+              </motion.div>
+              <motion.div
+                className="p-4 bg-red-50 rounded-lg border border-red-100"
+                whileHover={{
+                  y: -5,
+                  transition: {
+                    duration: 0.2,
+                  },
+                }}
+              >
+                <div className="text-red-700 font-semibold mb-1">
+                  Previous Failures
+                </div>
+                <div className="text-2xl font-bold text-red-600">
+                  {student ? student.previous_failures : "--"}
                 </div>
               </motion.div>
               <motion.div

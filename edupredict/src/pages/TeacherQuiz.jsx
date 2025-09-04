@@ -11,40 +11,48 @@ import {
 import { DownloadIcon } from "lucide-react";
 import axios from "axios";
 import Loader from "../components/Custom/Loader";
-import { quiz_summary } from "../Api/internal";
+import { fetch_teacher_analytics} from "../Api/internal";
+
 
 function TeacherQuiz() {
-  const [quizData, setQuizData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]); // filtered by month
-  const [loading, setLoading] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState(false); // initially no filter
+  const [analytics, setAnalytics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState("");
 
+  // ✅ API Call
   useEffect(() => {
-    setLoading(true);
-    quiz_summary()
-      .then((res) => {
-        setQuizData(res.data);
+    const getAnalytics = async () => {
+      try {
+        const teacherData = JSON.parse(localStorage.getItem("teacher"));
+        const token = teacherData?.token;
+
+        if (!token) {
+          toast.error("No token found. Please login again.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch_teacher_analytics(token);
+        setAnalytics(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        toast.error("Failed to fetch analytics");
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch Quiz data:", err);
-        setLoading(false);
-      });
+      }
+    };
+
+    getAnalytics();
   }, []);
 
-  useEffect(() => {
-    if (!selectedBatch || selectedBatch === "Select Batch") {
-      setFilteredData(quizData);
-    } else {
-      const filtered = quizData.filter((item) => item.batch === selectedBatch);
-      setFilteredData(filtered);
-    }
-  }, [selectedBatch, quizData]);
-
-
+  // ✅ Filter Data by Month
+  const filteredData = (analytics || []).filter((item) =>
+    selectedMonth ? item.month === selectedMonth : true
+  );
+  
+  // ✅ CSV Download
   const downloadCSV = (rows, filename) => {
     if (!rows.length) {
-      alert("No data available to download");
+      toast.error("No data available to download");
       return;
     }
 
@@ -53,7 +61,7 @@ function TeacherQuiz() {
       headers,
       ...rows.map((row) =>
         Object.values(row)
-          .map((val) => `"${val}"`) // wrap values in quotes for safety
+          .map((val) => "${val}")
           .join(",")
       ),
     ].join("\n");
@@ -65,62 +73,46 @@ function TeacherQuiz() {
     link.click();
   };
 
-  // Handle download
   const handleDownload = () => {
-    if (selectedBatch !== "Select Batch" && filteredData.length > 0) {
-      downloadCSV(filteredData, `quiz ${selectedBatch}.csv`);
+    if (filteredData.length > 0) {
+      downloadCSV(filteredData, "Quiz_Analytics.csv");
     } else {
-      downloadCSV(quizData, "Quiz_all.csv");
+      downloadCSV(analytics, "Quiz_All.csv");
     }
   };
 
+  if (loading) return <Loader />;
 
-
-  const formattedData = filteredData.map((item) => ({
-    month: item.month,
-    name: item.course_id,
-    total: item.quizzes_completed,
-    maxScore: 20,
-    score: item.quizzes_completed,
-  }));
-
-  if (loading || !formattedData) return <Loader />;
+  // ✅ Dropdown ke liye months extract
+  const months = [...new Set(analytics.map((item) => item.month))];
   return (
-    <div className="flex w-full min-h-screen justify-center items-center p-4">
+    <div className="w-full min-h-screen items-center p-4 flex flex-col">
       <div className="w-full max-w-7xl">
         <div className="flex flex-col">
           {/* Chart Section */}
           <div className="bg-white rounded-lg p-6 mb-6 shadow-md">
-        <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-2 items-start sm:items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-2 items-start sm:items-center mb-4">
               <div>
                 <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-                  Quiz Performance
+                 Monthly Quiz Performance
                 </h1>
-                <p className="text-gray-600">
-                  Total quizzes Completed
-                </p>
+                <p className="text-gray-600">Total quizzes completed</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
+                {/* Month Dropdown */}
                 <div className="relative">
                   <select
-                    value={selectedBatch}
-                    onChange={(e) => setSelectedBatch(e.target.value)}
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
                     className="appearance-none w-full sm:w-auto bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#9078e2] transition"
                   >
-                    <option value="Select Batch">Select Batch</option>
-                    <option value="B001">B001</option>
-                    <option value="B002">B002</option>
-                    <option value="B003">B003</option>
-                    <option value="B004">B004</option>
-                    <option value="B005">B005</option>
-                    <option value="B006">B006</option>
-                    <option value="B007">B007</option>
-                    <option value="B008">B008</option>
-                    <option value="B009">B009</option>
-                    <option value="B010">B010</option>
-                    <option value="B011">B011</option>
+                    <option value="">All Months</option>
+                    {months.map((month, idx) => (
+                      <option key={idx} value={month}>
+                        {month}
+                      </option>
+                    ))}
                   </select>
-
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg
                       className="fill-current h-4 w-4"
@@ -131,20 +123,21 @@ function TeacherQuiz() {
                     </svg>
                   </div>
                 </div>
-                <button 
-                onClick={handleDownload}
-                className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto"
+                >
                   <DownloadIcon size={16} />
                   <span>Download</span>
                 </button>
               </div>
             </div>
-
+            {filteredData.length > 0 ? (
             <div className="h-[300px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={formattedData}
-                  margin={{ top: 20, right: 10, left: 0, bottom: 40 }}
+                  data={filteredData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -164,11 +157,18 @@ function TeacherQuiz() {
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-white border shadow p-2 rounded text-sm text-gray-700">
-                            <p>Month: {payload[0].payload.month}</p>
-                            <p className="font-semibold">
-                              Course: {payload[0].payload.name}
+                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">Month: {payload[0].payload.month}</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+                              Course:{" "}
+                          <span className="text-blue-600 dark:text-blue-400">
+                            {payload[0]?.payload.course}
+                          </span>
                             </p>
-                            <p>Total quizzes: {payload[0].payload.total}</p>
+                            <p className="text-sm text-[#9078e2] font-medium flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-[#9078e2] inline-block"></span>
+                              Total quizzes:{" "}
+                              {payload[0].payload.quizzes_completed}
+                            </p>
                           </div>
                         );
                       }
@@ -176,7 +176,7 @@ function TeacherQuiz() {
                     }}
                   />
                   <Bar
-                    dataKey="score"
+                    dataKey="quizzes_completed"
                     fill="#9078e2"
                     radius={[4, 4, 0, 0]}
                     barSize={100}
@@ -184,56 +184,68 @@ function TeacherQuiz() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+             ) : (
+              <p className="text-center text-gray-500 mt-10">
+                ⚠ No quiz data available for this teacher
+              </p>
+            )}
           </div>
 
+          {/* Table Section */}
           <div className="bg-white rounded-lg p-6 shadow-md">
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
-        Quiz Breakdown
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Detailed attendance for each course
-          </p>
-          {formattedData.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-300">
-                <thead>
-                  <tr>
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+            Monthly Quiz Breakdown
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Detailed Quiz for each Month
+            </p>
+            {filteredData.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-300">
+                  <thead>
+                    <tr>
                     <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
-                      Month
-                    </th>
-                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
-                      Course
-                    </th>
-                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
-                    Total Quizzes
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formattedData.map((item, index) => (
-                    <tr key={index}>
-                      <td className="py-3 px-4 text-gray-800 border border-gray-300">
-                        {item.month}
-                      </td>
-                      <td className="py-3 px-4 text-gray-800 border border-gray-300">
-                        {item.name}
-                      </td>
-                      <td className="py-3 px-4 text-gray-800 border border-gray-300">
-                        {item.total}
-                      </td>
+                       Teacher_Name
+                      </th>
+                      <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                        Month
+                      </th>
+                      <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                        Course
+                      </th>
+                      <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                        Total Quizzes
+                      </th>
                      
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">
-              No attendance data available for this batch
-            </p>
-          )}
-        </div>
-        
+                  </thead>
+                  <tbody>
+                    {filteredData.map((item, index) => (
+                      <tr key={index}>
+                         <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                          {item.teacher_name}
+                        </td>
+                        <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                          {item.month}
+                        </td>
+                        <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                          {item.course}
+                        </td>
+                        <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                          {item.quizzes_completed}
+                        </td>
+                       
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center text-gray-500">
+                No Quiz available for this month
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

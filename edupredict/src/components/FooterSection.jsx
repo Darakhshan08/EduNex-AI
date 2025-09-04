@@ -6,6 +6,7 @@ import {
   InstagramIcon,
   LinkedinIcon,
 } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 function FooterSection() {
   return (
@@ -20,37 +21,33 @@ function FooterSection() {
               Groundlink for dependable safe, and professional chauffeured car
               end service in major cities across World.
             </p>
-            <div className="flex items-start">
-              <div className="bg-indigo-600 p-2 mr-4">
-                <ClockIcon className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-bold">OPENING HOURES</h4>
-                <p className="text-sm">Mon - Sat(8.00 - 6.00)</p>
-                <p className="text-sm">Sunday - Closed</p>
-              </div>
-            </div>
+            
           </div>
           {/* Useful Links */}
           <div>
             <h3 className="text-white text-xl font-bold mb-6">Usefull Links</h3>
             <ul className="space-y-3 text-sm">
-              <li>About Us</li>
-              <li>Teachers</li>
-              <li>Partner</li>
-              <li>Room-Details</li>
-              <li>Gallery</li>
+              <li>
+    <Link to="/about" className="hover:text-[#9078e2] transition-colors">
+      About Us
+    </Link>
+  </li>
+  <li>
+    <Link to="/contact" className="hover:text-[#9078e2] transition-colors">
+      Contact Us
+    </Link>
+  </li>
             </ul>
           </div>
           {/* Course */}
           <div>
             <h3 className="text-white text-xl font-bold mb-6">Course</h3>
             <ul className="space-y-3 text-sm">
-              <li>Ui Ux Design</li>
-              <li>Web Development</li>
-              <li>Business Strategy</li>
-              <li>Software Development</li>
-              <li>Business English</li>
+              <li>Digital Marketing</li>
+              <li>Generative AI</li>
+              <li>Cyber Security</li>
+              <li>Graphics Desiging</li>
+              <li>Data Science</li>
             </ul>
           </div>
           {/* Recent Post */}
@@ -97,10 +94,10 @@ function FooterSection() {
         <div className="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-6 md:mb-0">
             <span className="text-white text-2xl font-bold">
-              <span className="text-indigo-500">Edu</span>rock
+              <span className="text-indigo-500">Edu</span>Nex AI
             </span>
             <span className="ml-4 text-sm">
-              Copyright © 2024 by edurock. All Rights Reserved.
+              Copyright © 2025 by edunex ai. All Rights Reserved.
             </span>
           </div>
           <div className="flex space-x-4">
@@ -141,4 +138,4 @@ function FooterSection() {
   );
 }
 
-export default FooterSection
+export default FooterSection

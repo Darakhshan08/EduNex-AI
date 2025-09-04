@@ -34,23 +34,23 @@ function FeatureSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card
             icon={<BarChartIcon className="w-8 h-8 text-[#9078e2]" />}
-            title="Business Studies"
-            description="Construction is a general term the art and science to form"
+            title="Performance Prediction"
+            description="Leverage AI algorithms to predict student performance and identify learning gaps before they become problems."
           />
           <Card
             icon={<LightbulbIcon className="w-8 h-8 text-[#9078e2]" />}
-            title="Artist & Design"
-            description="Construction is a general term the art and science to form"
+            title="AI Chatbot Assistant"
+            description="24/7 support for students with our intelligent chatbot that answers questions and provides guidance."
           />
           <Card
             icon={<BookOpenIcon className="w-8 h-8 text-[#9078e2]" />}
-            title="Machine Learning"
-            description="Construction is a general term the art and science to form"
+            title="Comprehensive Analytics"
+            description="Detailed insights into class and individual performance with actionable recommendations."
           />
           <Card
             icon={<BarChartIcon className="w-8 h-8 text-[#9078e2]" />}
-            title="Artist & Design"
-            description="Construction is a general term the art and science to form"
+            title="Role-Based Access"
+            description="Secure access for educators, students, and administrators with role-specific features and dashboards."
           />
         </div>
       </div>
