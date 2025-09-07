@@ -85,4 +85,125 @@ teacherRoutes.get("/data", protect(["teacher"]), (req, res) => {
     });
 });
 
+
+teacherRoutes.get("/dropout_risk", protect(["teacher"]), (req, res) => {
+  const teacherName = req.user.name;
+  const batchId = req.user.batch_id;
+  const course = req.user.courses;
+  const monthFilter = req.query.month;
+
+  const results = [];
+  const monthsSet = new Set();
+
+  fs.createReadStream("data/all_batches.csv")
+    .pipe(csv())
+    .on("data", (row) => {
+      if (
+        row.teacher_name === teacherName &&
+        row.batch_id === batchId &&
+        row.course === course
+      ) {
+        if (row.month) monthsSet.add(row.month);
+
+        if (!monthFilter || row.month === monthFilter) {
+          results.push(row);
+        }
+      }
+    })
+    .on("end", () => {
+      if (results.length === 0) {
+        return res.json({ message: "No records found" });
+      }
+
+      // ✅ Risk thresholds
+      const thresholds = {
+        Low: {
+          gpa: 2.5,
+          attendance_percentage: 60,
+          lms_engagement_score: 70,
+          assignments_completed: 10,
+          quizzes_completed: 5,
+        },
+        Medium: {
+          gpa: 1.8,
+          attendance_percentage: 50,
+          lms_engagement_score: 50,
+          assignments_completed: 7,
+          quizzes_completed: 3,
+        },
+        High: {
+          gpa: 0,
+          attendance_percentage: 0,
+          lms_engagement_score: 0,
+          assignments_completed: 0,
+          quizzes_completed: 0,
+        },
+      };
+
+      const student_risks = results.map((row) => {
+        const gpa = parseFloat(row.gpa);
+        const attendance = parseFloat(row.attendance_percentage);
+        const lms = parseFloat(row.lms_engagement_score);
+        const assignments = parseInt(row.assignments_completed);
+        const quizzes = parseInt(row.quizzes_completed);
+        const failures = parseInt(row.previous_failures);
+
+        // Default risk
+        let predicted_risk = "Low";
+        if (gpa < thresholds.Medium.gpa || attendance < thresholds.Medium.attendance_percentage) {
+          predicted_risk = "Medium";
+        }
+        if (gpa < thresholds.Low.gpa / 2 || attendance < thresholds.Medium.attendance_percentage / 2) {
+          predicted_risk = "High";
+        }
+
+        // Reasons
+        const reasons = [];
+        if (attendance < 50) reasons.push("Low attendance");
+        if (gpa < 2) reasons.push("Low GPA");
+        if (lms < 60) reasons.push("Low LMS activity");
+        if (assignments < 10) reasons.push("Incomplete assignments");
+        if (quizzes < 5) reasons.push("Low quiz participation");
+        if (failures > 0) reasons.push(`Previous Failures: ${failures}`);
+
+        return {
+          student_id: row.student_id,
+          Month: row.month,
+          name: row.Name,
+          Course: row.course,
+          teacher_name: row.teacher_name,
+          attendance: `${attendance.toFixed(2)}%`,
+          gpa: gpa.toFixed(2),
+          assignments_completed: assignments,
+          quizzes_completed: quizzes,
+          lms_engagement_score: lms.toFixed(1),
+          previous_failures: failures,
+          risk_level: predicted_risk,
+          risk_reason: reasons.length > 0 ? reasons.join(", ") : "No major issues",
+        };
+      });
+
+      // ✅ Final response
+      res.json({
+        batch_id: batchId,
+        course: course,
+        months: Array.from(monthsSet).sort(
+          (a, b) =>
+            [
+              "January","February","March","April","May","June",
+              "July","August","September","October","November","December",
+            ].indexOf(a) -
+            [
+              "January","February","March","April","May","June",
+              "July","August","September","October","November","December",
+            ].indexOf(b)
+        ),
+        students: student_risks,
+      });
+    })
+    .on("error", (err) => {
+      res.status(500).json({ error: err.message });
+    });
+});
+
 module.exports = teacherRoutes;

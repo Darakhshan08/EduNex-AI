@@ -250,10 +250,10 @@
 
 
 
-// components/Chatbot.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { BookOpen, TrendingUp, AlertCircle, Target, Send } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { Send, BookOpen, TrendingUp, AlertCircle, Target, XIcon } from "lucide-react";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -269,6 +269,9 @@ const Chatbot = () => {
     role: "",
     student_id: ""
   });
+
+  // --- Speech recognition hook ---
+  const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
   // --- Token Decode ---
   function parseJwt(token) {
@@ -287,14 +290,15 @@ const Chatbot = () => {
     }
   }
 
-   useEffect(() => {
+  // --- Load user info ---
+  useEffect(() => {
     const admin = localStorage.getItem("admin");
     const teacher = localStorage.getItem("teacher");
     const student = localStorage.getItem("student");
     const token = admin || teacher || student;
-  
+
     if (token) {
-      const decoded = parseJwt(token);
+      const decoded = parseJwt(JSON.parse(token).token);
       if (decoded) {
         setUserData({
           name: decoded.name || "",
@@ -303,7 +307,6 @@ const Chatbot = () => {
           role: decoded.role || "",
           student_id: decoded.student_id || ""
         });
-
 
         if (decoded.role === "student") {
           setMessages([
@@ -324,129 +327,112 @@ const Chatbot = () => {
         }
       }
     } else {
-      setMessages([
-        { id: 1, sender: "bot", text: "👋 Please login to access EduNex AI counseling." }
-      ]);
+      setMessages([{ id: 1, sender: "bot", text: "👋 Please login to access EduNex AI counseling." }]);
     }
   }, []);
 
-  // --- Handle Send ---
-const handleSend = async () => {
-  if (!input.trim()) return;
+  // --- Auto-update input with speech ---
+  useEffect(() => {
+    if (transcript) setInput(transcript);
+  }, [transcript]);
 
-  const userMessage = { id: Date.now(), sender: "user", text: input };
-  setMessages((prev) => [...prev, userMessage]);
-  setInput("");
-  setBotTyping(true);
+  // --- Text-to-speech ---
+  const speak = (text) => {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
 
-  try {
-    // yahan original token nikaalo
-    const tokenString = localStorage.getItem("student");
+  // --- Handle send ---
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-    if (!tokenString) {
+    const userMessage = { id: Date.now(), sender: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    resetTranscript();
+    setBotTyping(true);
+
+    try {
+      const tokenString = localStorage.getItem("student");
+      if (!tokenString) {
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now() + 1, sender: "bot", text: "❌ Please login to continue" }
+        ]);
+        setBotTyping(false);
+        return;
+      }
+
+      const studentData = JSON.parse(tokenString);
+      const token = studentData.token;
+
+      const res = await fetch("http://localhost:8000/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: input })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+
+      if (data.studentStats) setStudentStats(data.studentStats);
+
+      const botMessage = { id: Date.now() + 1, sender: "bot", text: data.reply };
+      setMessages((prev) => [...prev, botMessage]);
+      speak(data.reply); // <-- speak bot reply
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, sender: "bot", text: "❌ Please login to continue" }
+        {
+          id: Date.now() + 1,
+          sender: "bot",
+          text:
+            err.message === "Access denied. Students only."
+              ? "❌ Only students can access this feature."
+              : "❌ Something went wrong. Please try again."
+        }
       ]);
+    } finally {
       setBotTyping(false);
-      return;
     }
+  };
 
-    // decode sirf check ke liye
-    const studentData = JSON.parse(tokenString);
-
-    const decoded = parseJwt(studentData.token);
-    if(!decoded)return;
-    console.log("Decoded token:", decoded);
-    
-    const token = studentData.token;
-    const res = await fetch("http://localhost:8000/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // 👈 yahan decoded nahi, raw token bhejna hai
-      },
-      body: JSON.stringify({ message: input }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error || "Request failed");
-
-    if (data.studentStats) setStudentStats(data.studentStats);
-
-    const botMessage = {
-      id: Date.now() + 1,
-      sender: "bot",
-      text: data.reply,
-    };
-    setMessages((prev) => [...prev, botMessage]);
-  } catch (err) {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now() + 1,
-        sender: "bot",
-        text:
-          err.message === "Access denied. Students only."
-            ? "❌ Only students can access this feature."
-            : "❌ Something went wrong. Please try again.",
-      },
-    ]);
-  } finally {
-    setBotTyping(false);
-  }
-};
-
-  // Auto-scroll
+  // --- Auto scroll ---
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth"
-    });
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, botTyping]);
 
-  // Quick actions (students only)
+  // --- Quick Actions ---
   const quickActions =
     userData.role === "student"
       ? [
-          {
-            icon: <BookOpen className="w-3 h-3" />,
-            text: "Recommend courses",
-            action:
-              "Based on my performance and interests, which courses would you recommend?"
-          },
-          {
-            icon: <TrendingUp className="w-3 h-3" />,
-            text: "Career guidance",
-            action: "Give me career guidance based on my performance and skills"
-          },
-          {
-            icon: <AlertCircle className="w-3 h-3" />,
-            text: "My performance",
-            action: "Analyze my academic performance and suggest improvements"
-          },
-          {
-            icon: <Target className="w-3 h-3" />,
-            text: "Learning path",
-            action: "Create a personalized learning path for me"
-          }
+          { icon: <BookOpen className="w-3 h-3" />, text: "Recommend courses", action: "Based on my performance and interests, which courses would you recommend?" },
+          { icon: <TrendingUp className="w-3 h-3" />, text: "Career guidance", action: "Give me career guidance based on my performance and skills" },
+          { icon: <AlertCircle className="w-3 h-3" />, text: "My performance", action: "Analyze my academic performance and suggest improvements" },
+          { icon: <Target className="w-3 h-3" />, text: "Learning path", action: "Create a personalized learning path for me" }
         ]
       : [];
 
-  // Risk color
+  // --- Risk color ---
   const getRiskColor = (risk) => {
     switch (risk) {
-      case "High":
-        return "text-red-500";
-      case "Medium":
-        return "text-yellow-500";
-      case "Low":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
+      case "High": return "text-red-500";
+      case "Medium": return "text-yellow-500";
+      case "Low": return "text-green-500";
+      default: return "text-gray-500";
     }
   };
+
+  if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
+    return <p>Your browser does not support voice recognition.</p>;
+  }
 
   return (
     <div className="fixed bottom-5 right-5 z-50">
@@ -464,17 +450,10 @@ const handleSend = async () => {
             alt="EduNex AI"
             className="w-20 h-20 object-contain drop-shadow-xl"
             animate={{ y: [0, -8, 0] }}
-            transition={{
-              y: { repeat: Infinity, repeatType: "loop", duration: 2 }
-            }}
+            transition={{ y: { repeat: Infinity, repeatType: "loop", duration: 2 } }}
           />
           {!open && (
-            <motion.div
-              className="mt-1 px-2 py-1 bg-indigo-500 text-white text-xs rounded-xl shadow"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
+            <motion.div className="mt-1 px-2 py-1 bg-indigo-500 text-white text-xs rounded-xl shadow" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               👋 Hi! Need Help?
             </motion.div>
           )}
@@ -484,48 +463,24 @@ const handleSend = async () => {
       {/* Chat Window */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            transition={{ duration: 0.3 }}
-            className="mt-3 w-80 sm:w-96 h-[550px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
-          >
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} transition={{ duration: 0.3 }} className="mt-3 w-80 sm:w-96 h-[550px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
             {/* Header */}
             <div className="bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md">
-
               <div>
-              <h2 className="font-bold text-lg flex items-center gap-2">
-                EduNex AI <span className="animate-pulse">🤖</span>
-              </h2>
-
+                <h2 className="font-bold text-lg flex items-center gap-2">
+                  EduNex AI <span className="animate-pulse">🤖</span>
+                </h2>
                 <div className="flex gap-2 text-xs mt-1">
-                  <span className="bg-white/20 px-2 rounded-full">
-                    {userData.role || "Guest"}
-                  </span>
+                  <span className="bg-white/20 px-2 rounded-full">{userData.role || "Guest"}</span>
                   {studentStats && (
                     <>
-                      <span
-                        className={`${getRiskColor(
-                          studentStats.dropoutRisk
-                        )} bg-white/20 px-2 rounded-full`}
-                      >
-                        Risk: {studentStats.dropoutRisk}
-                      </span>
-                      <span className="bg-white/20 px-2 rounded-full">
-                        {studentStats.attendance}% Attendance
-                      </span>
+                      <span className={`${getRiskColor(studentStats.dropoutRisk)} bg-white/20 px-2 rounded-full`}>Risk: {studentStats.dropoutRisk}</span>
+                      <span className="bg-white/20 px-2 rounded-full">{studentStats.attendance}% Attendance</span>
                     </>
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="text-white text-xl font-bold hover:text-gray-200 transition"
-              >
-                ✖
-              </button>
-
+              <button onClick={() => setOpen(false)} className="text-white text-xl font-bold hover:text-gray-200 transition">✖</button>
             </div>
 
             {/* Quick Actions */}
@@ -534,68 +489,30 @@ const handleSend = async () => {
                 <p className="text-xs text-gray-600 mb-1">Quick Actions:</p>
                 <div className="flex flex-wrap gap-2">
                   {quickActions.map((qa, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setInput(qa.action);
-                        handleSend();
-                      }}
-                      className="flex items-center gap-1 text-xs bg-white border px-3 py-1.5 rounded-full hover:bg-indigo-50"
-                    >
-                      {qa.icon}
-                      {qa.text}
-                    </button>
+                    <button key={i} onClick={() => { setInput(qa.action); handleSend(); }} className="flex items-center gap-1 text-xs bg-white border px-3 py-1.5 rounded-full hover:bg-indigo-50">{qa.icon}{qa.text}</button>
                   ))}
                 </div>
               </div>
             )}
 
             {/* Messages */}
-              {/* Messages */}
-              <div
-              ref={scrollRef}
-              className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-gray-100"
-            >
+            <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-gray-100">
               {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, x: msg.sender === "user" ? 50 : -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-
+                <motion.div key={msg.id} initial={{ opacity: 0, x: msg.sender === "user" ? 50 : -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                   {msg.sender === "bot" && (
-                    <div className="w-9 h-9 bg-[#c4bef0] text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md">
-                      🤖
-                    </div>
+                    <div className="w-9 h-9 bg-[#c4bef0] text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md">🤖</div>
                   )}
-
-<div
-                    className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow ${
-                      msg.sender === "user"
-                        ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
-                        : "bg-white text-gray-800 rounded-bl-none"
-                    }`}
-                  >
+                  <div className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow ${msg.sender === "user" ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none" : "bg-white text-gray-800 rounded-bl-none"}`}>
                     {msg.text}
                   </div>
                   {msg.sender === "user" && (
-                    <div className="w-9 h-9 bg-[#9078e2] text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md">
-                      {userData?.name?.charAt(0).toUpperCase()}
-                    </div>
+                    <div className="w-9 h-9 bg-[#9078e2] text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md">{userData?.name?.charAt(0).toUpperCase()}</div>
                   )}
-
                 </motion.div>
               ))}
-                       {/* Typing Indicator */}
-                {botTyping && (
+              {botTyping && (
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center">
-                    🤖
-                  </div>
+                  <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center">🤖</div>
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
@@ -603,30 +520,20 @@ const handleSend = async () => {
                   </div>
                 </div>
               )}
-
             </div>
 
-            {/* Input */}
+            {/* Input + Mic */}
             <div className="p-3 border-t border-gray-200 flex items-center gap-2 bg-white">
+              <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()} placeholder="Type Your Message" className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9078e2] bg-gray-50 text-sm" />
 
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type Your Message"
-                className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9078e2] bg-gray-50 text-sm"
-              />
+              {/* Microphone button */}
+              <button onClick={() => SpeechRecognition.startListening({ continuous: false })} className={`p-2 rounded-full ${listening ? "bg-red-500" : "bg-indigo-500"} text-white`}>
+                🎤
+              </button>
 
-<motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSend}
-                className="bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white p-3 rounded-full shadow hover:shadow-lg transition"
-              >
+              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={handleSend} className="bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white p-3 rounded-full shadow hover:shadow-lg transition">
                 <Send className="w-5 h-5" />
               </motion.button>
-
             </div>
           </motion.div>
         )}

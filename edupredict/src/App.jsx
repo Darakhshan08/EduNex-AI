@@ -36,6 +36,7 @@ import { ChatbotProvider } from "./components/Chatbot/ChatbotContext";
 import TeacherQuiz from "./pages/teacherquiz";
 import Teacherattendance from "./pages/Teacherattendance";
 import TeacherAssignment from "./pages/TeacherAssignment";
+import StudentDropout from "./pages/StudentDropout";
 
 
 export function App() {
@@ -75,6 +76,14 @@ export function App() {
                   element={
                     <AuthLayout token={"admin"}>
                       <Attendance />
+                    </AuthLayout>
+                  }
+                />
+                  <Route
+                  path="/stddropout"
+                  element={
+                    <AuthLayout token={"admin"}>
+                      <StudentDropout/>
                     </AuthLayout>
                   }
                 />

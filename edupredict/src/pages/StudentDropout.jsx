@@ -4,108 +4,57 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import Loader from "../components/Custom/Loader";
 
-function parseJwt(token) {
-  try {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    return null;
-  }
-}
-
-function Dropout_risk() {
+function StudentDropout() {
+  const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [months, setMonths] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedReason, setSelectedReason] = useState(null);
-  const [data, setData] = useState({
-    batch_id: "",
-    course: "",
-    months: [],
-    students: [], // ✅ students array
-  });
-  const [userData, setUserData] = useState({
-    name: "",
-    batch_id: "",
-    courses: "",
-  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerCategory = 5;
 
   // ===== Load user info from localStorage =====
-  useEffect(() => {
-    const tokenString = localStorage.getItem("teacher");
-    if (!tokenString) return;
 
-    const teacherData = JSON.parse(tokenString);
-    const decoded = parseJwt(teacherData.token);
-    if (!decoded) return;
+ useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const studentRes = await axios.get(
+          "http://localhost:3001/dropout_risk_percentage"
+        );
+        setStudentData(studentRes.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("API Error:", err);
+      }
+    };
 
-    setUserData({
-      name: decoded.name,
-      batch_id: decoded.batch_id,
-      courses: decoded.courses,
-    });
+    fetchData();
   }, []);
+  if (loading || !studentData) return <Loader />;
+  // Categorize students by risk
+  const lowRiskStudents = studentData.filter(
+    (student) => student.risk_level === "Low"
+  );
 
-  const fetchTeacherData = async (month = "") => {
-    const tokenString = localStorage.getItem("teacher");
-    if (!tokenString) return console.error("No token found!");
+  const mediumRiskStudents = studentData.filter(
+    (student) => student.risk_level === "Medium"
+  );
 
-    const teacherData = JSON.parse(tokenString);
-    const token = teacherData.token;
-    const url = month
-      ? `http://localhost:8000/api/teacher/dropout_risk?month=${month}`
-      : `http://localhost:8000/api/teacher/dropout_risk`;
+  const highRiskStudents = studentData.filter(
+    (student) => student.risk_level === "High"
+  );
 
-    setLoading(true);
-    try {
-      const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setData(res.data);
-      setMonths(res.data.months || []);
-      setSelectedMonth(month);
-    } catch (err) {
-      console.error("API Error:", err.response?.data || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   // ===== Fetch once userData loaded =====
-  useEffect(() => {
-    if (userData?.name) fetchTeacherData();
-  }, [userData]);
+  
 
-  const handleMonthChange = (e) => {
-    const month = e.target.value;
-    setSelectedMonth(month);
-    fetchTeacherData(month);
-  };
+  
 
   const riskColor = {
     Low: "bg-green-200 text-green-800",
     Medium: "bg-orange-200 text-orange-800",
     High: "bg-red-200 text-red-800",
   };
-
-  // ✅ Risk-based categorization
-  const students = data.students || data.stddata || [];
-
-  const lowRiskStudents = students.filter((s) => s.risk_level === "Low");
-  const mediumRiskStudents = students.filter((s) => s.risk_level === "Medium");
-  const highRiskStudents = students.filter((s) => s.risk_level === "High");
-
   // ✅ Pagination
   const startIndex = (currentPage - 1) * itemsPerCategory;
   const endIndex = currentPage * itemsPerCategory;
@@ -126,54 +75,37 @@ function Dropout_risk() {
     ) / itemsPerCategory
   );
     // ✅ CSV Download
-  // ✅ CSV Download
+
 const downloadCSV = (rows, filename) => {
-  if (!rows.length) {
-    toast.error("No data available to download");
-    return;
-  }
-
-  // Ensure safe CSV escaping for commas/quotes
-  const escapeCSV = (val) => {
-    if (val == null) return ""; // null/undefined ko blank karo
-    const str = String(val);
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`; // quotes ko double quotes me replace karo
+    if (!rows.length) {
+      alert("No data available to download");
+      return;
     }
-    return str;
+ const headers = Object.keys(rows[0]).join(",");
+    const csv = [
+      headers,
+      ...rows.map((row) =>
+        Object.values(row)
+          .map((val) => `"${val}"`) // wrap values in quotes for safety
+          .join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
   };
-
-  const headers = Object.keys(rows[0]).join(",");
-  const csv = [
-    headers,
-    ...rows.map((row) =>
-      Object.values(row)
-        .map((val) => escapeCSV(val))
-        .join(",")
-    ),
-  ].join("\n");
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-
-  const handleDownload = () => {
-  if (paginatedData.length > 0) {
-    downloadCSV(paginatedData, "Dropout_Risk_Page.csv");
-  } else if (students.length > 0) {
-    downloadCSV(students, "Dropout_Risk_All.csv");
-  } else {
-    toast.error("No student data available to download");
-  }
-};
-
-  if (loading) return <Loader />;
+  
+const handleDownload = () => {
+    const today = new Date().toISOString().split("T")[0]; // 2025-08-22
+    if (studentData.length > 0) {
+      downloadCSV(studentData, `Dropout_risk_${today}.csv`);
+    } else {
+      downloadCSV(studentData, `Dropout_risk_${today}.csv`);
+    }
+  };
 
 
   return (
@@ -196,29 +128,6 @@ const downloadCSV = (rows, filename) => {
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
           {/* Month Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedMonth}
-              onChange={handleMonthChange}
-              className="appearance-none w-full sm:w-auto bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#9078e2] transition"
-            >
-              <option value="">All Months</option>
-              {months.map((month, idx) => (
-                <option key={idx} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg
-                className="fill-current h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
-            </div>
-          </div>
           <button 
             onClick={handleDownload}
           className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#9078e2] text-white font-medium hover:bg-[#7c64d4] transition w-full sm:w-auto">
@@ -364,4 +273,4 @@ const downloadCSV = (rows, filename) => {
   );
 }
 
-export default Dropout_risk;
+export default StudentDropout;
