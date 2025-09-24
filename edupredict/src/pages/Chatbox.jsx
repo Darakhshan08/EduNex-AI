@@ -272,6 +272,7 @@ const Chatbot = () => {
 
   // --- Speech recognition hook ---
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
+  const [speakingId, setSpeakingId] = useState(null);
 
   // --- Token Decode ---
   function parseJwt(token) {
@@ -337,14 +338,24 @@ const Chatbot = () => {
   }, [transcript]);
 
   // --- Text-to-speech ---
-  const speak = (text) => {
-    if (!window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    window.speechSynthesis.speak(utterance);
-  };
+ const speak = (text, id) => {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel(); // stop any current speech
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 1;
+  utterance.pitch = 1;
+
+  utterance.onend = () => setSpeakingId(null); // reset when done
+  setSpeakingId(id);
+  window.speechSynthesis.speak(utterance);
+};
+
+const stopSpeaking = () => {
+  window.speechSynthesis.cancel();
+  setSpeakingId(null);
+};
+
 
   // --- Handle send ---
   const handleSend = async () => {
@@ -386,7 +397,7 @@ const Chatbot = () => {
 
       const botMessage = { id: Date.now() + 1, sender: "bot", text: data.reply };
       setMessages((prev) => [...prev, botMessage]);
-      speak(data.reply); // <-- speak bot reply
+      // speak(data.reply); // <-- speak bot reply
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -496,40 +507,83 @@ const Chatbot = () => {
             )}
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-gray-100">
-              {messages.map((msg) => (
-                <motion.div key={msg.id} initial={{ opacity: 0, x: msg.sender === "user" ? 50 : -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                  {msg.sender === "bot" && (
-                    <div className="w-9 h-9 bg-[#c4bef0] text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md">🤖</div>
-                  )}
-                  <div className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow ${msg.sender === "user" ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none" : "bg-white text-gray-800 rounded-bl-none"}`}>
-                    {msg.text}
-                  </div>
-                  {msg.sender === "user" && (
-                    <div className="w-9 h-9 bg-[#9078e2] text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md">{userData?.name?.charAt(0).toUpperCase()}</div>
-                  )}
-                </motion.div>
-              ))}
-              {botTyping && (
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center">🤖</div>
-                  <div className="flex gap-1 items-center">
-            {[0, 1, 2].map((dot) => (
-              <motion.span
-                key={dot}
-                className="w-2 h-2 bg-gray-400 rounded-full"
-                animate={{ y: [0, -4, 0] }}
-                transition={{
-                  duration: 0.6,
-                  repeat: Infinity,
-                  delay: dot * 0.2,
-                }}
-              />
-            ))}
-          </div>
-                </div>
-              )}
-            </div>
+           <div
+  ref={scrollRef}
+  className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-gray-100"
+>
+  {messages.map((msg) => (
+    <motion.div
+      key={msg.id}
+      initial={{ opacity: 0, x: msg.sender === "user" ? 50 : -50 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+    >
+      {msg.sender === "bot" && (
+        <div className="w-9 h-9 bg-[#c4bef0] text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md">
+          🤖
+        </div>
+      )}
+
+      {/* ---- Bubble ---- */}
+      <div
+        className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow
+          ${msg.sender === "user"
+            ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
+            : "bg-white text-gray-800 rounded-bl-none"
+          }`}
+      >
+        {msg.text}
+
+        {/* ---- Read Aloud button INSIDE bubble ---- */}
+      {msg.sender === "bot" && (
+  <div className="mt-2 pt-2 border-t border-gray-200 flex justify-end">
+    <button
+      onClick={() =>
+        speakingId === msg.id
+          ? stopSpeaking()
+          : speak(msg.text, msg.id)
+      }
+      className="text-xs font-medium px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+    >
+      {speakingId === msg.id ? "⏹ Stop" : "🔊 Read Aloud"}
+    </button>
+  </div>
+)}
+
+      </div>
+
+      {msg.sender === "user" && (
+        <div className="w-9 h-9 bg-[#9078e2] text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md">
+          {userData?.name?.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </motion.div>
+  ))}
+
+  {botTyping && (
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center">
+        🤖
+      </div>
+      <div className="flex gap-1 items-center">
+        {[0, 1, 2].map((dot) => (
+          <motion.span
+            key={dot}
+            className="w-2 h-2 bg-gray-400 rounded-full"
+            animate={{ y: [0, -4, 0] }}
+            transition={{
+              duration: 0.6,
+              repeat: Infinity,
+              delay: dot * 0.2,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )}
+</div>
+
 
             {/* Input + Mic */}
             <div className="p-3 border-t border-gray-200 flex items-center gap-2 bg-white">
