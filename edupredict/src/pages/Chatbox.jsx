@@ -513,11 +513,20 @@ const Chatbot = () => {
               {botTyping && (
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-indigo-400 text-white rounded-full flex items-center justify-center">🤖</div>
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></span>
-                  </div>
+                  <div className="flex gap-1 items-center">
+            {[0, 1, 2].map((dot) => (
+              <motion.span
+                key={dot}
+                className="w-2 h-2 bg-gray-400 rounded-full"
+                animate={{ y: [0, -4, 0] }}
+                transition={{
+                  duration: 0.6,
+                  repeat: Infinity,
+                  delay: dot * 0.2,
+                }}
+              />
+            ))}
+          </div>
                 </div>
               )}
             </div>

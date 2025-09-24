@@ -206,4 +206,90 @@ teacherRoutes.get("/dropout_risk", protect(["teacher"]), (req, res) => {
     });
 });
 
+
+
+teacherRoutes.get("/academic_performance", protect(["teacher"]), (req, res) => {
+  const teacherName = req.user.name;
+  const batchId = req.user.batch_id;
+  const course = req.user.courses;
+  const monthFilter = req.query.month;
+
+  const results = [];
+  const monthsSet = new Set();
+
+
+  fs.createReadStream("data/all_batches.csv")
+    .pipe(csv())
+    .on("data", (row) => {
+      if (
+        row.teacher_name === teacherName &&
+        row.batch_id === batchId &&
+        row.course === course
+      ) {
+        if (row.month) monthsSet.add(row.month);
+
+        if (!monthFilter || row.month === monthFilter) {
+          results.push(row);
+        }
+      }
+    })
+    .on("end", () => {
+      if (results.length === 0) {
+        return res.json({ message: "No records found" });
+      }
+
+
+      // 1️⃣ Average GPA
+      const gpas = results.map((r) => parseFloat(r.gpa)).filter((g) => !isNaN(g));
+      const avgGpa =
+        gpas.length > 0
+          ? (gpas.reduce((a, b) => a + b, 0) / gpas.length).toFixed(2)
+          : null;
+
+      // 2️⃣ Performance Distribution
+      const distribution = {};
+      results.forEach((r) => {
+        const perf = r.predicted_performance || "Unknown";
+        distribution[perf] = (distribution[perf] || 0) + 1;
+      });
+
+      const performanceChartData = Object.keys(distribution).map((key) => ({
+        label: key,
+        value: distribution[key],
+      }));
+
+      // 3️⃣ Top 10 Students (Excellent)
+      const topStudents = results
+        .filter((r) => r.predicted_performance === "Excellent")
+        .map((r) => ({
+          student_id: r.student_id,
+          name: r.Name,
+          gpa: parseFloat(r.gpa).toFixed(2),
+          performance: r.predicted_performance,
+        }))
+        .sort((a, b) => parseFloat(b.gpa) - parseFloat(a.gpa))
+        .slice(0, 10);
+
+      // ✅ Final Response
+      res.json({
+        batch_id: batchId,
+        course: course,
+        months: Array.from(monthsSet),
+        average_gpa: avgGpa,
+        performance_distribution: performanceChartData,
+        top_students: topStudents,
+      });
+    })
+    .on("error", (err) => {
+      res.status(500).json({ error: err.message });
+    });
+});
+
+
+
+
+
+
+
+
 module.exports = teacherRoutes;

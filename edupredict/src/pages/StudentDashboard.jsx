@@ -18,7 +18,7 @@ import {
 } from "../Api/internal";
 import Loader from "../components/Custom/Loader";
 import axios from "axios";
-import { Award, CalendarClock, NotepadText, XCircleIcon } from "lucide-react";
+import { Award, CalendarClock, GraduationCap, NotepadText, XCircleIcon } from "lucide-react";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -184,6 +184,14 @@ const StudentDashboard = () => {
   // useEffect(() => {
   //   quizData();
   // }, []);
+
+  const riskColor = {
+    Low: "bg-green-200 text-green-800",
+    Medium: "bg-orange-200 text-orange-800",
+    High: "bg-red-200 text-red-800",
+  };
+
+
 
   useEffect(() => {
     const fetchStudent = async () => {
@@ -355,7 +363,7 @@ const StudentDashboard = () => {
             whileHover={{ y: -6, transition: { duration: 0.2 } }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <XCircleIcon size={30} className="text-[#9078e2]" />
+              <GraduationCap size={30} className="text-[#9078e2]" />
               <div className="text-md text-gray-600">Gpa</div>
             </div>
             <div className="text-3xl font-bold text-[#333333]">
@@ -401,7 +409,7 @@ const StudentDashboard = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <motion.div
-                className="p-4 bg-emerald-50 rounded-lg border border-emerald-100"
+                className="p-4 bg-emerald-100 rounded-lg border border-emerald-100"
                 whileHover={{
                   y: -5,
                   transition: {
@@ -417,7 +425,7 @@ const StudentDashboard = () => {
                 </div>
               </motion.div>
               <motion.div
-                className="p-4 bg-blue-50 rounded-lg border border-blue-100"
+                className="p-4 bg-blue-100 rounded-lg border border-blue-100"
                 whileHover={{
                   y: -5,
                   transition: {
@@ -433,7 +441,7 @@ const StudentDashboard = () => {
                 </div>
               </motion.div>
               <motion.div
-                className="p-4 bg-red-50 rounded-lg border border-red-100"
+                className="p-4 bg-red-100 rounded-lg border border-red-100"
                 whileHover={{
                   y: -5,
                   transition: {
@@ -449,7 +457,7 @@ const StudentDashboard = () => {
                 </div>
               </motion.div>
               <motion.div
-                className="p-4 bg-purple-50 rounded-lg border border-purple-100"
+                className="p-4 bg-purple-100 rounded-lg border border-purple-100"
                 whileHover={{
                   y: -5,
                   transition: {
@@ -567,7 +575,13 @@ const StudentDashboard = () => {
                         {item.teacher}
                       </td>
                       <td className="px-4 py-2 text-gray-800 border-b border-gray-200">
-                        {item.risk}
+                          <span
+                  className={`text-xs px-3 py-1 rounded-full font-medium ${
+                    riskColor[item.risk]
+                  }`}
+                >
+                  {item.risk}
+                </span>                
                       </td>
                     </tr>
                   ))}
