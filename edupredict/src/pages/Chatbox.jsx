@@ -337,24 +337,32 @@ const Chatbot = () => {
     if (transcript) setInput(transcript);
   }, [transcript]);
 
-  // --- Text-to-speech ---
- const speak = (text, id) => {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel(); // stop any current speech
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 1;
-  utterance.pitch = 1;
+ const [femaleVoice, setFemaleVoice] = useState(null);
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const f = voices.find(v =>
+        /female|woman|google us english|samantha|victoria|zoe|aria/i.test(v.name)
+      );
+      setFemaleVoice(f || voices[0]);
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
 
-  utterance.onend = () => setSpeakingId(null); // reset when done
-  setSpeakingId(id);
-  window.speechSynthesis.speak(utterance);
-};
-
-const stopSpeaking = () => {
-  window.speechSynthesis.cancel();
-  setSpeakingId(null);
-};
+  const speak = (text, id) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-US";
+    utter.voice = femaleVoice;  // 💡 female voice if available
+    utter.rate = 1;
+    utter.pitch = 1;
+    utter.onend = () => setSpeakingId(null);
+    setSpeakingId(id);
+    window.speechSynthesis.speak(utter);
+  };
+  const stopSpeaking = () => { window.speechSynthesis.cancel(); setSpeakingId(null); };
 
 
   // --- Handle send ---
