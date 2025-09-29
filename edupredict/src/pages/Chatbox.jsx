@@ -273,7 +273,7 @@ const Chatbot = () => {
   // --- Speech recognition hook ---
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
   const [speakingId, setSpeakingId] = useState(null);
-const confettiCanvasRef = useRef(null);
+const confettiCanvasRef = useRef(null);    // sparkle confetti 
   // --- Token Decode ---
   function parseJwt(token) {
     try {
@@ -366,15 +366,15 @@ function formatDateTime(date) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-US";
+    utter.lang = "en-US";     // language
     utter.voice = femaleVoice;  // 💡 female voice if available
     utter.rate = 1;
     utter.pitch = 1;
     utter.onend = () => setSpeakingId(null);
-    setSpeakingId(id);
+    setSpeakingId(id);     //read aloud par chale ga speech
     window.speechSynthesis.speak(utter);
   };
-  const stopSpeaking = () => { window.speechSynthesis.cancel(); setSpeakingId(null); };
+  const stopSpeaking = () => { window.speechSynthesis.cancel(); setSpeakingId(null); };   //stop speaking
 
 
   // --- Handle send ---
@@ -406,7 +406,7 @@ function formatDateTime(date) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`    //body se ata hai
         },
         body: JSON.stringify({ message: input })
       });
