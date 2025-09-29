@@ -273,7 +273,7 @@ const Chatbot = () => {
   // --- Speech recognition hook ---
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
   const [speakingId, setSpeakingId] = useState(null);
-
+const confettiCanvasRef = useRef(null);
   // --- Token Decode ---
   function parseJwt(token) {
     try {
@@ -290,6 +290,17 @@ const Chatbot = () => {
       return null;
     }
   }
+function formatDateTime(date) {
+  // Example: 29 Sep 2025, 01:45 AM
+  return new Date(date).toLocaleString([], {
+    // day: "2-digit",
+    // month: "short",
+    // year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true      // ✅ forces 12-hour format with AM/PM
+  });
+}
 
   // --- Load user info ---
   useEffect(() => {
@@ -314,7 +325,8 @@ const Chatbot = () => {
             {
               id: 1,
               sender: "bot",
-              text: `👋 Welcome back, ${decoded.name}! I'm your personal AI career counselor. Ask me anything about your performance, courses, or career guidance.`
+              text: `👋 Welcome back, ${decoded.name}! I'm your personal AI career counselor. Ask me anything about your performance, courses, or career guidance.`,
+              timestamp: new Date()
             }
           ]);
         } else {
@@ -367,9 +379,10 @@ const Chatbot = () => {
 
   // --- Handle send ---
   const handleSend = async () => {
+  
     if (!input.trim()) return;
-
-    const userMessage = { id: Date.now(), sender: "user", text: input };
+  const now = new Date(); // capture time once
+    const userMessage = { id: Date.now(), sender: "user", text: input,timestamp: now };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     resetTranscript();
@@ -380,7 +393,7 @@ const Chatbot = () => {
       if (!tokenString) {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now() + 1, sender: "bot", text: "❌ Please login to continue" }
+          { id: Date.now() + 1, sender: "bot", text: "❌ Please login to continue",timestamp: new Date() }
         ]);
         setBotTyping(false);
         return;
@@ -403,8 +416,12 @@ const Chatbot = () => {
 
       if (data.studentStats) setStudentStats(data.studentStats);
 
-      const botMessage = { id: Date.now() + 1, sender: "bot", text: data.reply };
+      const botMessage = { id: Date.now() + 1, sender: "bot", text: data.reply, timestamp: new Date() };
       setMessages((prev) => [...prev, botMessage]);
+
+      if (/congratulation|well done|great job|excellent|improved|promotion|pass/i.test(data.reply)) {
+fireConfetti();
+}
       // speak(data.reply); // <-- speak bot reply
     } catch (err) {
       setMessages((prev) => [
@@ -415,7 +432,8 @@ const Chatbot = () => {
           text:
             err.message === "Access denied. Students only."
               ? "❌ Only students can access this feature."
-              : "❌ Something went wrong. Please try again."
+              : "❌ Something went wrong. Please try again.",
+              timestamp: new Date()
         }
       ]);
     } finally {
@@ -448,6 +466,44 @@ const Chatbot = () => {
       default: return "text-gray-500";
     }
   };
+  // --- confetti: lightweight implementation ---
+const fireConfetti = (count = 80) => {
+const canvas = confettiCanvasRef.current;
+if (!canvas) return;
+const ctx = canvas.getContext("2d");
+const w = (canvas.width = canvas.clientWidth);
+const h = (canvas.height = canvas.clientHeight);
+const pieces = [];
+for (let i = 0; i < count; i++) {
+pieces.push({
+x: Math.random() * w,
+y: Math.random() * h - h / 2,
+r: (Math.random() * 6) + 4,
+d: Math.random() * count,
+color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+tilt: Math.random() * 10 - 10,
+});
+}
+let t = 0;
+const render = () => {
+ctx.clearRect(0, 0, w, h);
+t += 1;
+for (let i = 0; i < pieces.length; i++) {
+const p = pieces[i];
+p.y += Math.cos(t + p.d) + 3 + p.r / 2;
+p.x += Math.sin(t) * 0.5;
+p.tilt += 0.1;
+ctx.save();
+ctx.translate(p.x, p.y);
+ctx.rotate(p.tilt * 0.1);
+ctx.fillStyle = p.color;
+ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r);
+ctx.restore();
+}
+if (t < 200) requestAnimationFrame(render); else ctx.clearRect(0, 0, w, h);
+};
+render();
+};
 
   if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
     return <p>Your browser does not support voice recognition.</p>;
@@ -483,6 +539,8 @@ const Chatbot = () => {
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} transition={{ duration: 0.3 }} className="mt-3 w-80 sm:w-96 h-[550px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+            {/* Confetti canvas (absolute) */}
+<canvas ref={confettiCanvasRef} className="pointer-events-none absolute inset-0 w-full h-full" />
             {/* Header */}
             <div className="bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md">
               <div>
@@ -542,6 +600,9 @@ const Chatbot = () => {
           }`}
       >
         {msg.text}
+<div className="text-[10px] text-gray-900 mt-1 text-right">
+  {formatDateTime(msg.timestamp)}
+</div>
 
         {/* ---- Read Aloud button INSIDE bubble ---- */}
       {msg.sender === "bot" && (
