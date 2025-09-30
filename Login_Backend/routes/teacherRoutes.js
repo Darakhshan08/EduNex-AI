@@ -207,7 +207,7 @@ teacherRoutes.get("/dropout_risk", protect(["teacher"]), (req, res) => {
 });
 
 
-
+//performance distrebution
 teacherRoutes.get("/academic_performance", protect(["teacher"]), (req, res) => {
   const teacherName = req.user.name;
   const batchId = req.user.batch_id;
