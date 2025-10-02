@@ -602,7 +602,7 @@ render();
             />
             
             {/* Header */}
-            <div className={`${userData.role === 'teacher' ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'} text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md`}>
+            <div className={`${userData.role === 'teacher' ? 'bg-gradient-to-r from-indigo-500 to-[#9078e2]' : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'} text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md`}>
               <div>
                 <h2 className="font-bold text-lg flex items-center gap-2">
                   EduNex AI 
@@ -618,29 +618,25 @@ render();
                   {/* Student Stats */}
                   {studentStats && (
                     <>
-                      <span className={`${getRiskColor(studentStats.dropoutRisk)} bg-white/20 px-2 rounded-full`}>
-                        Risk: {studentStats.dropoutRisk}
-                      </span>
-                      <span className="bg-white/20 px-2 rounded-full">
-                        {studentStats.attendance}% Attendance
-                      </span>
+                       
+                      
                     </>
                   )}
                   
                   {/* Teacher Stats */}
                   {classStats && (
                     <>
+                    <span className="bg-white/20 px-2 rounded-full">
+                        Quiz: {classStats.avgQuizzes}
+                      </span>
+                     <span className="bg-white/20 px-2 rounded-full">
+                        Avg GPA: {classStats.avgGpa}
+                      </span>
                       <span className="bg-white/20 px-2 rounded-full">
                         {classStats.totalStudents} Students
                       </span>
-                      <span className="bg-white/20 px-2 rounded-full">
-                        Avg GPA: {classStats.avgGpa}
-                      </span>
-                      {classStats.highRiskCount > 0 && (
-                        <span className="bg-red-500/30 px-2 rounded-full">
-                          {classStats.highRiskCount} High Risk
-                        </span>
-                      )}
+                    
+                     
                     </>
                   )}
                 </div>
@@ -699,7 +695,7 @@ render();
                     className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow
                       ${msg.sender === "user"
                         ? userData.role === 'teacher' 
-                          ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-br-none"
+                          ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
                           : "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
                         : "bg-white text-gray-800 rounded-bl-none"
                       }`}
@@ -780,7 +776,7 @@ render();
                 whileHover={{ scale: 1.1 }} 
                 whileTap={{ scale: 0.95 }} 
                 onClick={handleSend} 
-                className={`${userData.role === 'teacher' ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'} text-white p-3 rounded-full shadow hover:shadow-lg transition`}
+                className={`${userData.role === 'teacher' ? 'bg-gradient-to-r from-indigo-500 to-[#9078e2]' : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'} text-white p-3 rounded-full shadow hover:shadow-lg transition`}
               >
                 <Send className="w-5 h-5" />
               </motion.button>
