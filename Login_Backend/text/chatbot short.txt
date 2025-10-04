@@ -188,6 +188,7 @@ Respond appropriately based on the guidelines above. Keep the response focused, 
 
 
 
+
 // ===================== ENHANCED TEACHER FUNCTIONS WITH CONTEXT =====================
 
 // Store conversation context
@@ -204,31 +205,6 @@ const getTeacherStudentsData = (teacherName, batchId, course, monthFilter = null
     const monthsSet = new Set();
     const studentsByMonth = {};
     
-    // Define risk thresholds - SAME AS teacherRoutes
-    const thresholds = {
-      Low: {
-        gpa: 2.5,
-        attendance_percentage: 60,
-        lms_engagement_score: 70,
-        assignments_completed: 10,
-        quizzes_completed: 5,
-      },
-      Medium: {
-        gpa: 1.8,
-        attendance_percentage: 50,
-        lms_engagement_score: 50,
-        assignments_completed: 7,
-        quizzes_completed: 3,
-      },
-      High: {
-        gpa: 0,
-        attendance_percentage: 0,
-        lms_engagement_score: 0,
-        assignments_completed: 0,
-        quizzes_completed: 0,
-      },
-    };
-    
     fs.createReadStream("data/all_batches.csv")
       .pipe(csv())
       .on("data", (row) => {
@@ -244,45 +220,18 @@ const getTeacherStudentsData = (teacherName, batchId, course, monthFilter = null
             studentsByMonth[month] = [];
           }
           
-          // Parse values
-          const gpa = parseFloat(row.gpa) || 0;
-          const attendance = parseFloat(row.attendance_percentage) || 0;
-          const lms = parseFloat(row.lms_engagement_score) || 0;
-          const assignments = parseInt(row.assignments_completed) || 0;
-          const quizzes = parseInt(row.quizzes_completed) || 0;
-          const failures = parseInt(row.previous_failures) || 0;
-          
-          // Calculate risk - EXACT SAME LOGIC AS teacherRoutes
-          let predicted_risk = "Low";
-          if (gpa < thresholds.Medium.gpa || attendance < thresholds.Medium.attendance_percentage) {
-            predicted_risk = "Medium";
-          }
-          if (gpa < thresholds.Low.gpa / 2 || attendance < thresholds.Medium.attendance_percentage / 2) {
-            predicted_risk = "High";
-          }
-          
-          // Calculate risk reasons - EXACT SAME AS teacherRoutes
-          const reasons = [];
-          if (attendance < 50) reasons.push("Low attendance");
-          if (gpa < 2) reasons.push("Low GPA");
-          if (lms < 60) reasons.push("Low LMS activity");
-          if (assignments < 10) reasons.push("Incomplete assignments");
-          if (quizzes < 5) reasons.push("Low quiz participation");
-          if (failures > 0) reasons.push(`Previous Failures: ${failures}`);
-          
           const studentData = {
             student_id: row.student_id,
             name: row.Name,
-            gpa: gpa,
-            attendance: attendance,
+            gpa: parseFloat(row.gpa) || 0,
+            attendance: parseFloat(row.attendance_percentage) || 0,
             attendance_rate: parseFloat(row.attendance_rate) || 0,
-            assignments: assignments,
-            quizzes: quizzes,
-            lms_score: lms,
-            dropout_risk: predicted_risk, // Use calculated risk
-            risk_reason: reasons.length > 0 ? reasons.join(", ") : "No major issues",
+            assignments: parseInt(row.assignments_completed) || 0,
+            quizzes: parseInt(row.quizzes_completed) || 0,
+            lms_score: parseFloat(row.lms_engagement_score) || 0,
+            dropout_risk: row.dropout_risk || "Unknown",
             performance: row.predicted_performance || "Unknown",
-            previous_failures: failures,
+            previous_failures: parseInt(row.previous_failures) || 0,
             hours_studied: parseFloat(row.hours_studied_per_week) || 0,
             course: row.course,
             batch: row.batch_id,
@@ -332,7 +281,6 @@ const calculateDetailedStats = (students) => {
   const avgLmsScore = (students.reduce((sum, s) => sum + s.lms_score, 0) / total).toFixed(1);
   const avgStudyHours = (students.reduce((sum, s) => sum + s.hours_studied, 0) / total).toFixed(1);
   
-  // Risk distribution based on calculated risk
   const riskDistribution = {
     high: students.filter(s => s.dropout_risk === "High").length,
     medium: students.filter(s => s.dropout_risk === "Medium").length,
@@ -402,7 +350,7 @@ const calculateDetailedStats = (students) => {
   };
 };
 
-// Enhanced teacher prompt
+// Enhanced teacher prompt with better context awareness
 const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => {
   const { students, studentsByMonth, months, totalStudents, currentMonth } = studentsData;
   
@@ -412,8 +360,9 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
 
   const overallStats = calculateDetailedStats(students);
   
-  // Pattern matching for student queries
+  // Enhanced pattern matching for student queries with more variations
   const studentPatterns = [
+    // Name patterns
     /(?:tell me about|information about|details of|performance of|show me|check|analyze|report on|status of|data of|record of)\s+([\w\s]+?)(?:\s+in\s+(?:january|february|march|april|may|june|july|august|september|october|november|december))?\s*(?:\?|$|\.|\s+performance|\s+details|\s+risk|\s+status|\s+history|\s+record)/i,
     /(?:student\s+)?(?:history|record|data|information)\s+(?:of\s+)?([\w\s]+?)(?:\s+in\s+(?:january|february|march|april|may|june|july|august|september|october|november|december))?/i,
     /([\w\s]+?)\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+(?:history|record|performance|data)/i,
@@ -422,69 +371,15 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
     /([\w\s]+) (?:performance|details|status|progress|report)/i,
     /what about ([\w\s]+)/i,
     /([\w\s]+)'s (?:performance|grades|attendance|status|lms|assignments|quizzes)/i,
-    /^([\w\s]+)$/i
+    /^([\w\s]+)$/i // Just a name
   ];
 
-  // Check if asking for dropout/risk students
-  const askingDropoutRisk = /(?:dropout|at risk|high risk|risk students|struggling|top\s*\d*\s*dropout|failing)/i.test(userMessage);
-  const askingTopDropout = /(?:top\s*(\d+)?\s*(?:dropout|risk|struggling)|(\d+)?\s*(?:highest risk|most at risk))/i.test(userMessage);
-  
-  // Handle dropout risk queries
-  let dropoutRiskResponse = "";
-  if (askingDropoutRisk || askingTopDropout) {
-    const highRiskStudents = students
-      .filter(s => s.dropout_risk === "High")
-      .sort((a, b) => {
-        if (a.gpa !== b.gpa) return a.gpa - b.gpa;
-        return a.attendance - b.attendance;
-      });
-    
-    const match = userMessage.match(/top\s*(\d+)|(\d+)\s*(?:highest|most)/i);
-    const topCount = match ? (parseInt(match[1] || match[2]) || 5) : 5;
-    const topHighRisk = highRiskStudents.slice(0, topCount);
-    
-    if (topHighRisk.length > 0) {
-      dropoutRiskResponse = `Here are the top ${topHighRisk.length} students at high dropout risk:\n\n`;
-      topHighRisk.forEach((student, index) => {
-        dropoutRiskResponse += `${index + 1}. ${student.name} (Student ID: ${student.student_id})\n`;
-        dropoutRiskResponse += `   Month: ${student.month}\n`;
-        dropoutRiskResponse += `   Risk Level: ${student.dropout_risk}\n`;
-        dropoutRiskResponse += `   GPA: ${student.gpa.toFixed(2)}, Attendance: ${student.attendance}%, LMS Score: ${student.lms_score}\n`;
-        dropoutRiskResponse += `   Assignments: ${student.assignments}, Quizzes: ${student.quizzes}\n`;
-        dropoutRiskResponse += `   Previous Failures: ${student.previous_failures}\n`;
-        dropoutRiskResponse += `   Risk Reasons: ${student.risk_reason}\n`;
-        dropoutRiskResponse += `   Recommended Action: ${
-          student.attendance < 50 ? 'Immediate attendance intervention required' :
-          student.gpa < 2.0 ? 'Academic support and tutoring needed' :
-          student.previous_failures > 0 ? 'Remedial support for failed subjects' :
-          'Close monitoring and regular check-ins'
-        }\n\n`;
-      });
-      
-      // Add medium risk students if needed
-      if (askingTopDropout && topHighRisk.length < topCount) {
-        const mediumRiskStudents = students
-          .filter(s => s.dropout_risk === "Medium")
-          .sort((a, b) => a.gpa - b.gpa)
-          .slice(0, topCount - topHighRisk.length);
-        
-        if (mediumRiskStudents.length > 0) {
-          dropoutRiskResponse += `\nAdditional Medium Risk Students:\n`;
-          mediumRiskStudents.forEach((student, index) => {
-            dropoutRiskResponse += `${topHighRisk.length + index + 1}. ${student.name} - Risk: ${student.dropout_risk}, GPA: ${student.gpa.toFixed(2)}, Reasons: ${student.risk_reason}\n`;
-          });
-        }
-      }
-    } else {
-      dropoutRiskResponse = "Good news! No students are currently at high dropout risk. However, continue monitoring medium-risk students.";
-    }
-  }
-
-  // Check for follow-up questions
+  // Check if this is a follow-up question about the same student
   let isFollowUp = false;
   let contextStudent = null;
   let requestedMonth = null;
   
+  // Check for month in the message
   const monthNames = ["january","february","march","april","may","june","july","august","september","october","november","december"];
   const lowerMessage = userMessage.toLowerCase();
   
@@ -495,21 +390,24 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
     }
   }
 
+  // Check if asking about specific metrics for context student
   if (conversationContext.lastStudent && 
       /(?:and\s+)?(?:his|her|their)?\s*(?:lms|attendance|assignments|quizzes|gpa|risk|failures|study hours)/i.test(userMessage)) {
     isFollowUp = true;
     contextStudent = conversationContext.lastStudent;
   }
 
-  // Check for specific student
+  // Check for student name in message
   let specificStudentInfo = "";
+  let studentFound = false;
   
-  if (!isFollowUp && !askingDropoutRisk) {
+  if (!isFollowUp) {
     for (const pattern of studentPatterns) {
       const match = userMessage.match(pattern);
       if (match) {
         const searchName = match[1].trim().toLowerCase();
         
+        // Search in appropriate data pool
         let searchPool = students;
         if (requestedMonth) {
           searchPool = studentsByMonth[requestedMonth] || students;
@@ -524,6 +422,7 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
         );
         
         if (student) {
+          studentFound = true;
           conversationContext.lastStudent = student;
           conversationContext.lastMonth = student.month;
           contextStudent = student;
@@ -535,6 +434,7 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
 
   // Generate response for specific student
   if (contextStudent) {
+    // Check what specific information is being asked
     const askingLMS = /lms|engagement/i.test(userMessage);
     const askingAttendance = /attendance/i.test(userMessage);
     const askingAssignments = /assignment/i.test(userMessage);
@@ -544,7 +444,8 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
     const askingGPA = /gpa|grade/i.test(userMessage);
     
     if (isFollowUp && (askingLMS || askingAttendance || askingAssignments || askingQuizzes || askingRisk || askingFailures || askingGPA)) {
-      let response = "";
+      // Provide specific metric for context student
+      let response = `For ${contextStudent.name} in ${contextStudent.month}:\n\n`;
       
       if (askingLMS) {
         response = `${contextStudent.name}'s LMS engagement score is ${contextStudent.lms_score}/100, which indicates ${
@@ -552,23 +453,56 @@ const createEnhancedTeacherPrompt = (teacherData, studentsData, userMessage) => 
           contextStudent.lms_score >= 60 ? 'moderate engagement' : 
           'low engagement that needs improvement'
         }. ${contextStudent.lms_score < 60 ? 'I recommend encouraging more platform interaction through daily check-ins.' : ''}`;
+      } else if (askingAttendance) {
+        response = `${contextStudent.name} has ${contextStudent.attendance}% attendance, which is ${
+          contextStudent.attendance >= 90 ? 'excellent' : 
+          contextStudent.attendance >= 75 ? 'good' : 
+          contextStudent.attendance >= 60 ? 'average and needs monitoring' : 
+          'poor and requires immediate intervention'
+        }.`;
+      } else if (askingAssignments) {
+        response = `${contextStudent.name} has completed ${contextStudent.assignments} assignments. ${
+          contextStudent.assignments >= 15 ? 'This shows excellent commitment.' : 
+          contextStudent.assignments >= 10 ? 'This is satisfactory but could be improved.' : 
+          'This is concerning and needs follow-up.'
+        }`;
+      } else if (askingQuizzes) {
+        response = `${contextStudent.name} has completed ${contextStudent.quizzes} quizzes. ${
+          contextStudent.quizzes >= 10 ? 'Good quiz participation!' : 
+          contextStudent.quizzes >= 5 ? 'Moderate participation, encourage more attempts.' : 
+          'Low quiz participation needs attention.'
+        }`;
       } else if (askingRisk) {
-        response = `${contextStudent.name}'s dropout risk is ${contextStudent.dropout_risk}. Risk factors: ${contextStudent.risk_reason}. ${
+        response = `${contextStudent.name}'s dropout risk is ${contextStudent.dropout_risk}. ${
           contextStudent.dropout_risk === 'High' ? 'Immediate intervention required - schedule a one-on-one meeting.' :
           contextStudent.dropout_risk === 'Medium' ? 'Monitor closely and provide additional support.' :
           'Currently stable but maintain regular check-ins.'
         }`;
+      } else if (askingFailures) {
+        response = `${contextStudent.name} has ${contextStudent.previous_failures} previous failures. ${
+          contextStudent.previous_failures === 0 ? 'Clean academic record!' :
+          contextStudent.previous_failures === 1 ? 'One previous failure - provide remedial support.' :
+          'Multiple failures require comprehensive academic support plan.'
+        }`;
+      } else if (askingGPA) {
+        response = `${contextStudent.name}'s GPA is ${contextStudent.gpa.toFixed(2)}/4.0, which is ${
+          contextStudent.gpa >= 3.5 ? 'excellent' :
+          contextStudent.gpa >= 3.0 ? 'good' :
+          contextStudent.gpa >= 2.5 ? 'average' :
+          'below average and needs improvement'
+        }.`;
       }
       
       specificStudentInfo = response;
     } else {
+      // Full student profile
       let monthlyProgression = "";
       if (months.length > 1) {
         const studentAllMonths = [];
         months.forEach(month => {
           const monthStudent = studentsByMonth[month]?.find(s => s.student_id === contextStudent.student_id);
           if (monthStudent) {
-            studentAllMonths.push(`${month}: Performance is ${monthStudent.performance}, GPA is ${monthStudent.gpa.toFixed(2)}, Attendance is ${monthStudent.attendance}%, Risk: ${monthStudent.dropout_risk}`);
+            studentAllMonths.push(`${month}: Performance is ${monthStudent.performance}, GPA is ${monthStudent.gpa.toFixed(2)}, Attendance is ${monthStudent.attendance}%`);
           }
         });
         if (studentAllMonths.length > 1) {
@@ -584,39 +518,36 @@ Attendance Rate: ${contextStudent.attendance}%
 Assignments Completed: ${contextStudent.assignments}
 Quizzes Completed: ${contextStudent.quizzes}
 LMS Engagement Score: ${contextStudent.lms_score}/100
-Dropout Risk Level: ${contextStudent.dropout_risk}
-Risk Reasons: ${contextStudent.risk_reason}
+Risk Level: ${contextStudent.dropout_risk}
 Study Hours per Week: ${contextStudent.hours_studied} hours
 Previous Failures: ${contextStudent.previous_failures}
 
 ${contextStudent.dropout_risk === "High" || contextStudent.performance === "Below Average" ? 
 `\nImmediate Actions Needed:
-${contextStudent.dropout_risk === "High" ? '- Schedule one-on-one counseling session\n' : ''}${contextStudent.attendance < 60 ? '- Implement attendance improvement plan\n' : ''}${contextStudent.gpa < 2.5 ? '- Provide additional tutoring support\n' : ''}${contextStudent.assignments < 10 ? '- Follow up on assignment submissions\n' : ''}${contextStudent.lms_score < 50 ? '- Encourage more platform engagement\n' : ''}` : 
+${contextStudent.dropout_risk === "High" ? '• Schedule one-on-one counseling session\n' : ''}${contextStudent.attendance < 60 ? '• Implement attendance improvement plan\n' : ''}${contextStudent.gpa < 2.5 ? '• Provide additional tutoring support\n' : ''}${contextStudent.assignments < 10 ? '• Follow up on assignment submissions\n' : ''}${contextStudent.lms_score < 50 ? '• Encourage more platform engagement\n' : ''}` : 
 contextStudent.performance === "Excellent" ? '\nThis student is performing excellently. Continue current support.' :
 '\nStudent is performing satisfactorily. Monitor progress regularly.'}${monthlyProgression}`;
     }
   }
 
-  // Performance distribution query
+  // Check for performance distribution query
   let performanceQueryResponse = "";
   if (/performance distribution|distribution|how many excellent|how many above average|how many below average/i.test(userMessage)) {
     performanceQueryResponse = `The performance distribution for ${currentMonth || 'all months'} shows: Excellent students are ${overallStats.performanceWithPercentage.excellent.count} (${overallStats.performanceWithPercentage.excellent.percentage}%), Above Average students are ${overallStats.performanceWithPercentage.aboveAverage.count} (${overallStats.performanceWithPercentage.aboveAverage.percentage}%), Average students are ${overallStats.performanceWithPercentage.average.count} (${overallStats.performanceWithPercentage.average.percentage}%), and Below Average students are ${overallStats.performanceWithPercentage.belowAverage.count} (${overallStats.performanceWithPercentage.belowAverage.percentage}%).`;
+    
+    if (months.length > 1 && /monthly/i.test(userMessage)) {
+      performanceQueryResponse += "\n\nMonth-wise breakdown:\n";
+      months.forEach(month => {
+        const monthStudents = studentsByMonth[month] || [];
+        if (monthStudents.length > 0) {
+          const monthStats = calculateDetailedStats(monthStudents);
+          performanceQueryResponse += `\n${month}: Excellent (${monthStats.performanceWithPercentage.excellent.percentage}%), Above Average (${monthStats.performanceWithPercentage.aboveAverage.percentage}%), Average (${monthStats.performanceWithPercentage.average.percentage}%), Below Average (${monthStats.performanceWithPercentage.belowAverage.percentage}%)`;
+        }
+      });
+    }
   }
 
-  // Get high-risk and top performing students
-  const actualHighRiskStudents = students
-    .filter(s => s.dropout_risk === "High")
-    .sort((a, b) => a.gpa - b.gpa)
-    .slice(0, 5)
-    .map(s => `${s.name} (GPA: ${s.gpa.toFixed(2)}, Attendance: ${s.attendance}%, Risk: ${s.dropout_risk}, Reasons: ${s.risk_reason})`);
-    
-  const topPerformers = students
-    .filter(s => s.performance === "Excellent" || s.performance === "Above Average")
-    .sort((a, b) => b.gpa - a.gpa)
-    .slice(0, 5)
-    .map(s => `${s.name} (GPA: ${s.gpa.toFixed(2)}, Performance: ${s.performance}, Attendance: ${s.attendance}%)`);
-
-  // Generate main prompt
+  // Generate main prompt with context awareness
   return `You are a helpful AI teaching assistant for Professor ${teacherData.name}. You have access to detailed student data for Batch ${teacherData.batch_id} in ${teacherData.courses}.
 
 IMPORTANT CONTEXT:
@@ -627,36 +558,26 @@ CLASS OVERVIEW:
 Total Students: ${totalStudents}
 Average GPA: ${overallStats.averages.gpa}
 Average Attendance: ${overallStats.averages.attendance}%
-High Risk Students: ${overallStats.riskDistribution.high}
-Medium Risk Students: ${overallStats.riskDistribution.medium}
-Low Risk Students: ${overallStats.riskDistribution.low}
 Available Months: ${months.join(', ')}
 
-${dropoutRiskResponse || specificStudentInfo || performanceQueryResponse}
-
-${!dropoutRiskResponse && !specificStudentInfo && !performanceQueryResponse ? `
-HIGH RISK STUDENTS (with reasons):
-${actualHighRiskStudents.length > 0 ? actualHighRiskStudents.join('\n') : 'No high-risk students identified'}
-
-TOP PERFORMERS:
-${topPerformers.length > 0 ? topPerformers.join('\n') : 'No top performers identified'}
-` : ''}
+${specificStudentInfo ? specificStudentInfo : performanceQueryResponse}
 
 CONVERSATION GUIDELINES:
-1. Use natural language without any markdown formatting or asterisks
-2. No bullet points with asterisks - use simple dashes (-) or numbers
-3. Remember context from previous questions
-4. Always show dropout risk with reasons
-5. Be conversational and helpful
-6. Provide specific data when available
-7. Keep responses warm and professional
+1. Remember context from previous questions - if teacher asks follow-up questions, respond about the same student
+2. Use natural language without markdown formatting or asterisks
+3. Be concise and conversational like a helpful colleague
+4. When teacher asks "and [metric]?" understand it's about the same student just discussed
+5. Recognize various ways of asking: "student history", "performance record", "July data", etc.
+6. Always provide specific data when available
+7. Never use bullet points with asterisks, use simple text or dashes
+8. Keep responses warm and professional
 
-${!specificStudentInfo && !performanceQueryResponse && !dropoutRiskResponse ? `
+${!specificStudentInfo && !performanceQueryResponse ? `
 To help you better, you can ask me:
-- About specific students: "Tell me about [student name]"
-- Dropout risk: "Show me top 5 dropout risk students" or "Who are at high risk?"
-- Performance: "What is the performance distribution?"
+- About specific students: "Tell me about [student name]" or "[student name] performance"
 - Follow-up questions: "and their LMS score?" or "what about attendance?"
+- Class analytics: "performance distribution" or "monthly comparison"
+- Risk assessment: "who are at high risk?" or "struggling students"
 ` : ''}`;
 };
 

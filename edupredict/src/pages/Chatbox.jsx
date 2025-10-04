@@ -438,10 +438,16 @@ function formatDateTime(date) {
       const botMessage = { id: Date.now() + 1, sender: "bot", text: data.reply, timestamp: new Date() };
       setMessages((prev) => [...prev, botMessage]);
       
+      
       // Fire confetti for positive messages
-      if (/congratulation|well done|great job|excellent|improved|promotion|pass/i.test(data.reply)) {
-fireConfetti();
+      // Fire confetti for positive messages (Only for students)
+if (
+  userData.role === "student" && 
+  /congratulation|well done|great job|excellent|improved|promotion|pass/i.test(data.reply)
+) {
+  fireConfetti();
 }
+
       // speak(data.reply); // <-- speak bot reply
     } catch (err) {
       setMessages((prev) => [
