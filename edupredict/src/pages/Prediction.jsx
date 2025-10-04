@@ -168,6 +168,12 @@ function Prediction() {
                 <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
                     Student Name
                   </th>
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                    Batch_id
+                  </th>
+                    <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
+                    Teacher_Name
+                  </th>
                   <th className="py-3 px-4 text-left text-gray-600 font-medium border border-gray-300">
                     Month
                   </th>
@@ -203,6 +209,12 @@ function Prediction() {
                         >
                             <td className="py-3 px-4 text-gray-800 border border-gray-300">
                             {student.name}
+                          </td>
+                           <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                            {student.Batch}
+                          </td>
+                            <td className="py-3 px-4 text-gray-800 border border-gray-300">
+                            {student.teacher_name}
                           </td>
                           <td className="py-3 px-4 text-gray-800 border border-gray-300">
                             {student.Month}

@@ -554,22 +554,31 @@ def calculate_dropout_risk_per_student(spark_df: DataFrame):
         "July": 7, "August": 8, "September": 9,
         "October": 10, "November": 11, "December": 12
     }
+    batch_order = {
+        "B001": 1, "B002": 2, "B003": 3,
+        "B004": 4, "B005": 5, "B006": 6,
+        "B007": 7, "B008": 8, "B009": 9,
+        "B010": 10, "B011": 11
+    }
+
 
     pandas_df = spark_df.select(
-        "student_id", "month", "Name", "course", "teacher_name", "dropout_risk", *feature_cols
+        "student_id", "month","batch_id", "Name", "course", "teacher_name", "dropout_risk", *feature_cols
     ).toPandas()
 
     pandas_df.dropna(
-        subset=["student_id", "month", "Name", "teacher_name", "dropout_risk"] + feature_cols,
+        subset=["student_id", "month","batch_id", "Name", "teacher_name", "dropout_risk"] + feature_cols,
         inplace=True
     )
     pandas_df = pandas_df.reset_index(drop=True)
 
     # Add numeric month for sorting
     pandas_df["month_num"] = pandas_df["month"].map(month_order)
+    pandas_df["batch_num"] = pandas_df["batch_id"].map(batch_order)
 
     # Sort by student → month order
-    pandas_df = pandas_df.sort_values(by=["student_id", "month_num"]).reset_index(drop=True)
+    pandas_df = pandas_df.sort_values(by=["batch_num", "student_id", "month_num"]).reset_index(drop=True)
+
 
     # Encode labels
     label_map = {"Low": 0, "Medium": 1, "High": 2}
@@ -668,6 +677,7 @@ def calculate_dropout_risk_per_student(spark_df: DataFrame):
         student_data = {
             "student_id": row["student_id"],
             "Month": row["month"],
+            "Batch": row["batch_id"],
             "name": row["Name"],
             "Course": row["course"],
             "teacher_name": row["teacher_name"],
