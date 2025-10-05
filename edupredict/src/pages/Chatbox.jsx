@@ -438,7 +438,7 @@ function formatDateTime(date) {
       const botMessage = { id: Date.now() + 1, sender: "bot", text: data.reply, timestamp: new Date() };
       setMessages((prev) => [...prev, botMessage]);
       
-      
+
       // Fire confetti for positive messages
       // Fire confetti for positive messages (Only for students)
 if (

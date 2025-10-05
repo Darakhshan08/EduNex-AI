@@ -205,6 +205,8 @@ def generate_attendance_heatmap_data(spark_df: DataFrame) -> Dict[str, List]:
         "values": pivot_data.values.tolist()
     }
 
+
+# attendance_trend admin dasboard
 def perform_attendance_trend_analysis(attendance_data: pd.DataFrame, limit: Optional[str] = None) -> Dict[str, List]:
     # Ensure month is string (e.g., "2025-01" or "Jan-2025")
     attendance_data["month"] = attendance_data["month"].astype(str)
@@ -237,7 +239,7 @@ def perform_attendance_trend_analysis(attendance_data: pd.DataFrame, limit: Opti
 
 
 
-
+# Prediction Overview Summary of dropout risk  Admin
 def train_rf_model_and_get_dropout_summary(spark_df):
     feature_cols = [
         "attendance_rate",
@@ -308,7 +310,7 @@ def train_rf_model_and_get_dropout_summary(spark_df):
 
 
 
-
+# same uper se
 def train_rf_model_and_get_dropout_summary(spark_df: DataFrame):
     # Step 1: Define feature columns based on your dataset
     feature_cols = [
@@ -536,6 +538,8 @@ def train_rf_model_and_get_dropout_summary(spark_df: DataFrame):
 #     return sorted(student_risks, key=lambda x: x["student_id"])
 
 
+
+#  Individual student dropout risk predictions. Admin
 def calculate_dropout_risk_per_student(spark_df: DataFrame):
     feature_cols = [
         "gpa",
@@ -793,7 +797,7 @@ def train_rf_model_and_get_student_probabilities(spark_df):
 
 
 
-
+# student performance summary
 def train_rf_model_and_get_performance_summary(spark_df):
     # Step 1: Feature columns
     feature_cols = [

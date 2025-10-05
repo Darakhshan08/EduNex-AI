@@ -299,7 +299,7 @@ def get_course_overview(
 
 
 
-
+# course demond prdiction
 def predict_course_demand_from_df(spark_df: pd.DataFrame):
     df = spark_df.toPandas()
     # Feature columns
