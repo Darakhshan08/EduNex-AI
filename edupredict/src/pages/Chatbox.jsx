@@ -254,8 +254,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Send, BookOpen, TrendingUp, AlertCircle, Target, XIcon, Users, AlertTriangle, BarChart, UserCheck } from "lucide-react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import { useNavigate } from "react-router-dom";
 
 const Chatbot = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [open, setOpen] = useState(false);
@@ -371,9 +373,111 @@ function formatDateTime(date) {
   }, []);
 
   // --- Auto-update input with speech ---
-  useEffect(() => {
-    if (transcript) setInput(transcript);
-  }, [transcript]);
+useEffect(() => {
+  // 1️⃣ Fill input with speech text (live)
+  if (transcript) setInput(transcript);
+
+  // 2️⃣ Wait until user finishes speaking (only then process commands)
+  if (!transcript || listening) return; // <- important fix (run only after speech stops)
+
+  const lower = transcript.toLowerCase();
+
+  const navigateWithVoice = (path, message) => {
+    speak(message); // voice feedback
+    setTimeout(() => navigate(path), 1000);
+  };
+
+  // ===== STUDENT COMMANDS =====
+  if (userData.role === "student") {
+    if (/dashboard|home/.test(lower)) {
+      navigateWithVoice("/studentdashboard", "Navigating to your dashboard");
+    } else if (/setting|my profile/.test(lower)) {
+      navigateWithVoice("/settings", "Opening your profile");
+    } else if (/analysis|student analysis|analytics/.test(lower)) {
+      navigateWithVoice("/analysis", "Opening student analysis");
+    } else if (/courses|my courses|subjects/.test(lower)) {
+      navigateWithVoice("/student/courses", "Opening your enrolled courses");
+    } else if (/logout|sign out/.test(lower)) {
+      speak("Logging you out. See you soon!");
+      localStorage.removeItem("student");
+      setTimeout(() => navigate("/login"), 1000);
+    }
+  }
+
+  // ===== TEACHER COMMANDS =====
+  else if (userData.role === "teacher") {
+    if (/dashboard|home/.test(lower)) {navigateWithVoice("/teacherdashboard", "Opening your dashboard");}
+     else if (/attendance|teacherattendance/.test(lower)) {
+      navigateWithVoice("/teacherattendence", "Opening Attendance Page");}
+       else if (/dropoutrisk|dropout risk/.test(lower)) {
+      navigateWithVoice("/dropout", "Opening Dropout risk Page");}
+      else if (/studentperformance|student performance/.test(lower)) {
+      navigateWithVoice("/stdperformance", "Opening Student Performance");}
+       else if (/coursedemand|course demand/.test(lower)) {
+      navigateWithVoice("/demands", "Opening Course Demand");}
+      else if (/setting|my profile/.test(lower)) {
+      navigateWithVoice("/settingteacher", "Opening your profile");
+    }
+       else if (/studenthistory|student history/.test(lower)) {
+      navigateWithVoice("/stdhistory", "Opening Student History");}
+       else if (/quiz|teacherquiz/.test(lower)) {
+      navigateWithVoice("/teacherquiz", "Opening Quiz Page");
+    } else if (/assignment|teacherassignment/.test(lower)) {
+      navigateWithVoice("/teacherassignment", "Opening Assignment Page");
+    } else if (/logout|sign out/.test(lower)) {
+      speak("Logging you out. Have a great day, Professor!");
+      localStorage.removeItem("teacher");
+      setTimeout(() => navigate("/login"), 1000);
+    }
+  }
+
+  // ===== ADMIN COMMANDS =====
+  else if (userData.role === "admin") {
+    if (/dashboard|home/.test(lower)) {
+      navigateWithVoice("/attendance", "Opening the admin dashboard");
+    } else if (/usermanagement|user management/.test(lower)) {
+      navigateWithVoice("/usermanagement", "Showing all Active Inactive Users");
+    } else if (/attendance|admin attendance/.test(lower)) {
+      navigateWithVoice("/studentattendance", "Opening Attendance");} 
+
+      else if (/quiz|admin quiz/.test(lower)) {
+      navigateWithVoice("/studentquiz", "Opening Quiz");
+    }
+    else if (/assignment|admin assignment/.test(lower)) {
+      navigateWithVoice("/assignment", "Opening Assignment");
+    }
+    else if (/dataset|data set/.test(lower)) {
+      navigateWithVoice("/dataset", "Opening Dataset");
+    }
+    else if (/prediction|admin prediction/.test(lower)) {
+      navigateWithVoice("/prediction", "Opening Prediction");
+    }
+     else if (/feedback|admin feedback/.test(lower)) {
+      navigateWithVoice("/feedback", "Showing all Feedback");
+    }
+   else if (/setting|my profile/.test(lower)) {
+      navigateWithVoice("/setting", "Opening settings");
+    } else if (/logout|sign out/.test(lower)) {
+      speak("Logging out. Goodbye, Admin.");
+      localStorage.removeItem("admin");
+      setTimeout(() => navigate("/login"), 1000);
+    }
+  }
+
+  // ===== COMMON COMMANDS =====
+  if (/chatbot|ai assistant|open chat/.test(lower)) {
+    speak("Opening chatbot.");
+    setOpen(true);
+  } else if (/close chat|hide chat/.test(lower)) {
+    speak("Closing chatbot.");
+    setOpen(false);
+  }
+
+  // ✅ reset transcript after processing
+  resetTranscript();
+}, [transcript, listening, userData.role, navigate]);
+
+
 
 // Female voice setup
  const [femaleVoice, setFemaleVoice] = useState(null);

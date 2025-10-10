@@ -8,38 +8,38 @@ const Feedback = () => {
   const [feedbacks, setFeedbacks] = useState([]);
 
   useEffect(() => {
-  // Get the raw item from localStorage
-  const adminData = localStorage.getItem("admin");
-  const teacherData = localStorage.getItem("teacher");
-  const studentData = localStorage.getItem("student");
+    // Get the raw item from localStorage
+    const adminData = localStorage.getItem("admin");
+    const teacherData = localStorage.getItem("teacher");
+    const studentData = localStorage.getItem("student");
 
-  // Extract actual token string
-  const getToken = (data) => {
-    try {
-      const parsed = JSON.parse(data);
-      return parsed.token;
-    } catch (err) {
-      return data; // In case it's already a plain token
-    }
-  };
+    // Extract actual token string
+    const getToken = (data) => {
+      try {
+        const parsed = JSON.parse(data);
+        return parsed.token;
+      } catch (err) {
+        return data; // In case it's already a plain token
+      }
+    };
 
-  const token = getToken(adminData || teacherData || studentData);
+    const token = getToken(adminData || teacherData || studentData);
 
-  const fetchFeedbacks = async () => {
-    try {
-      const res = await axios.get("http://localhost:8000/api/feedback", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setFeedbacks(res.data.feedbacks || []);
-    } catch (err) {
-      console.error("Failed to fetch feedbacks", err);
-    }
-  };
+    const fetchFeedbacks = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/feedback", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setFeedbacks(res.data.feedbacks || []);
+      } catch (err) {
+        console.error("Failed to fetch feedbacks", err);
+      }
+    };
 
-  fetchFeedbacks();
-}, []);
+    fetchFeedbacks();
+  }, []);
 
   const filteredFeedbacks = feedbacks
     .filter((fb) => fb.role !== "admin") // Exclude Admin feedbacks
@@ -126,14 +126,14 @@ const Feedback = () => {
                   <td className="py-4 px-4 text-gray-700">{fb.title}</td>
                   <td className="py-4 px-4 text-gray-500">{fb.from}</td>
                   <td className="py-4 px-4">
-                  <span
-  className={`px-2 py-1 rounded-md text-sm 
+                    <span
+                      className={`px-2 py-1 rounded-md text-sm 
     ${fb.role?.toLowerCase() === "teacher" ? "bg-blue-200 text-blue-800" : ""} 
     ${fb.role?.toLowerCase() === "student" ? "bg-green-200 text-green-800" : ""} 
     ${fb.role?.toLowerCase() === "admin" ? "bg-purple-200 text-purple-800" : ""}`}
->
-  {fb.role}
-</span>
+                    >
+                      {fb.role}
+                    </span>
                   </td>
                   <td className="py-4 px-4 text-gray-700">
                     {fb.content.length > 100
