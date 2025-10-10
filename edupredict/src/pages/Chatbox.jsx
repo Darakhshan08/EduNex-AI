@@ -344,7 +344,17 @@ function formatDateTime(date) {
               timestamp: new Date()
             }
           ]);
-        } 
+        } // Add to the Load user info section in useEffect
+       else if (decoded.role === "admin") {
+         setMessages([
+         {
+          id: 1,
+          sender: "bot",
+          text: `👋 Welcome Admin ${decoded.name}! I have access to all ML predictions and analytics. I can help you monitor student performance, analyze dropout risks, forecast course demand, and provide institutional insights.`,
+          timestamp: new Date()
+        }
+       ]);
+       }
         else {
           setMessages([
             {
@@ -506,7 +516,30 @@ if (
           action: "Who are the top performing students in my class?" 
         }
       ]
-      : [];
+      // Update Quick Actions to include admin actions
+      : userData.role === "admin"
+       ? [
+       { 
+         icon: <AlertTriangle className="w-3 h-3" />, 
+         text: "Dropout Risk Analysis", 
+         action: "Show me the dropout risk analysis across all courses" 
+      },
+      { 
+         icon: <BarChart className="w-3 h-3" />, 
+         text: "Performance Summary", 
+         action: "What's the overall student performance summary?" 
+      },
+      { 
+         icon: <TrendingUp className="w-3 h-3" />, 
+         text: "Course Demand", 
+         action: "Show me course demand predictions" 
+       },
+       { 
+        icon: <Users className="w-3 h-3" />, 
+        text: "Student Probabilities", 
+        action: "Show student success probabilities" 
+       }
+      ]: [];
 
   // --- Risk color ---
   const getRiskColor = (risk) => {
@@ -560,7 +593,7 @@ render();
     return <p>Your browser does not support voice recognition.</p>;
   }
 
-  return (
+ return (
     <div className="fixed bottom-5 right-5 z-50">
       {/* Floating Button */}
       <AnimatePresence>
@@ -607,13 +640,19 @@ render();
               className="pointer-events-none absolute inset-0 w-full h-full" 
             />
             
-            {/* Header */}
-            <div className={`${userData.role === 'teacher' ? 'bg-gradient-to-r from-indigo-500 to-[#9078e2]' : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'} text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md`}>
+            {/* Header - Updated with Admin styling */}
+            <div className={`${
+              userData.role === 'admin' 
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                : userData.role === 'teacher' 
+                ? 'bg-gradient-to-r from-indigo-500 to-[#9078e2]' 
+                : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'
+            } text-white px-4 py-4 flex justify-between items-center rounded-t-3xl shadow-md`}>
               <div>
                 <h2 className="font-bold text-lg flex items-center gap-2">
                   EduNex AI 
                   <span className="animate-pulse">
-                    {userData.role === 'teacher' ? '👨‍🏫' : '🤖'}
+                    {userData.role === 'admin' ? '👑' : userData.role === 'teacher' ? '👨‍🏫' : '🤖'}
                   </span>
                 </h2>
                 <div className="flex gap-2 text-xs mt-1">
@@ -622,27 +661,41 @@ render();
                   </span>
                   
                   {/* Student Stats */}
-                  {studentStats && (
+                  {studentStats && userData.role === 'student' && (
                     <>
-                       
-                      
+                      <span className={`${getRiskColor(studentStats.dropoutRisk)} bg-white/20 px-2 rounded-full`}>
+                        Risk: {studentStats.dropoutRisk}
+                      </span>
+                      <span className="bg-white/20 px-2 rounded-full">
+                        {studentStats.attendance}% Attendance
+                      </span>
                     </>
                   )}
                   
                   {/* Teacher Stats */}
-                  {classStats && (
+                  {classStats && userData.role === 'teacher' && (
                     <>
-                    <span className="bg-white/20 px-2 rounded-full">
+                      <span className="bg-white/20 px-2 rounded-full">
                         Quiz: {classStats.avgQuizzes}
                       </span>
-                     <span className="bg-white/20 px-2 rounded-full">
+                      <span className="bg-white/20 px-2 rounded-full">
                         Avg GPA: {classStats.avgGpa}
                       </span>
                       <span className="bg-white/20 px-2 rounded-full">
                         {classStats.totalStudents} Students
                       </span>
-                    
-                     
+                    </>
+                  )}
+                  
+                  {/* Admin Stats */}
+                  {userData.role === 'admin' && (
+                    <>
+                      <span className="bg-white/20 px-2 rounded-full">
+                        ML Analytics
+                      </span>
+                      <span className="bg-white/20 px-2 rounded-full">
+                        All Batches
+                      </span>
                     </>
                   )}
                 </div>
@@ -691,8 +744,14 @@ render();
                   className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.sender === "bot" && (
-                    <div className={`w-9 h-9 ${userData.role === 'teacher' ? 'bg-purple-400' : 'bg-[#c4bef0]'} text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md`}>
-                      {userData.role === 'teacher' ? '👨‍🏫' : '🤖'}
+                    <div className={`w-9 h-9 ${
+                      userData.role === 'admin' 
+                        ? 'bg-purple-600' 
+                        : userData.role === 'teacher' 
+                        ? 'bg-purple-400' 
+                        : 'bg-[#c4bef0]'
+                    } text-white rounded-full flex items-center justify-center text-sm font-bold mr-2 shadow-md`}>
+                      {userData.role === 'admin' ? '👑' : userData.role === 'teacher' ? '👨‍🏫' : '🤖'}
                     </div>
                   )}
 
@@ -700,7 +759,9 @@ render();
                   <div
                     className={`max-w-[70%] px-4 py-2 rounded-2xl break-words text-sm leading-relaxed shadow
                       ${msg.sender === "user"
-                        ? userData.role === 'teacher' 
+                        ? userData.role === 'admin'
+                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-none"
+                          : userData.role === 'teacher' 
                           ? "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
                           : "bg-gradient-to-r from-indigo-500 to-[#9078e2] text-white rounded-br-none"
                         : "bg-white text-gray-800 rounded-bl-none"
@@ -729,7 +790,13 @@ render();
                   </div>
 
                   {msg.sender === "user" && (
-                    <div className={`w-9 h-9 ${userData.role === 'teacher' ? 'bg-purple-500' : 'bg-[#9078e2]'} text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md`}>
+                    <div className={`w-9 h-9 ${
+                      userData.role === 'admin'
+                        ? 'bg-purple-600'
+                        : userData.role === 'teacher' 
+                        ? 'bg-purple-500' 
+                        : 'bg-[#9078e2]'
+                    } text-white rounded-full flex items-center justify-center text-sm font-bold ml-2 shadow-md`}>
                       {userData?.name?.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -738,8 +805,14 @@ render();
 
               {botTyping && (
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 ${userData.role === 'teacher' ? 'bg-purple-400' : 'bg-indigo-400'} text-white rounded-full flex items-center justify-center`}>
-                    {userData.role === 'teacher' ? '👨‍🏫' : '🤖'}
+                  <div className={`w-8 h-8 ${
+                    userData.role === 'admin'
+                      ? 'bg-purple-600'
+                      : userData.role === 'teacher' 
+                      ? 'bg-purple-400' 
+                      : 'bg-indigo-400'
+                  } text-white rounded-full flex items-center justify-center`}>
+                    {userData.role === 'admin' ? '👑' : userData.role === 'teacher' ? '👨‍🏫' : '🤖'}
                   </div>
                   <div className="flex gap-1 items-center">
                     {[0, 1, 2].map((dot) => (
@@ -766,14 +839,28 @@ render();
                 value={input} 
                 onChange={(e) => setInput(e.target.value)} 
                 onKeyDown={(e) => e.key === "Enter" && handleSend()} 
-                placeholder={userData.role === 'teacher' ? "Ask about your students..." : "Type Your Message"} 
+                placeholder={
+                  userData.role === 'admin' 
+                    ? "Ask about predictions, analytics, or students..." 
+                    : userData.role === 'teacher' 
+                    ? "Ask about your students..." 
+                    : "Type Your Message"
+                } 
                 className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9078e2] bg-gray-50 text-sm" 
               />
 
               {/* Microphone button */}
               <button 
                 onClick={() => SpeechRecognition.startListening({ continuous: false })} 
-                className={`p-2 rounded-full ${listening ? "bg-red-500" : userData.role === 'teacher' ? "bg-purple-500" : "bg-indigo-500"} text-white`}
+                className={`p-2 rounded-full ${
+                  listening 
+                    ? "bg-red-500" 
+                    : userData.role === 'admin'
+                    ? "bg-purple-600"
+                    : userData.role === 'teacher' 
+                    ? "bg-purple-500" 
+                    : "bg-indigo-500"
+                } text-white`}
               >
                 🎤
               </button>
@@ -782,7 +869,13 @@ render();
                 whileHover={{ scale: 1.1 }} 
                 whileTap={{ scale: 0.95 }} 
                 onClick={handleSend} 
-                className={`${userData.role === 'teacher' ? 'bg-gradient-to-r from-indigo-500 to-[#9078e2]' : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'} text-white p-3 rounded-full shadow hover:shadow-lg transition`}
+                className={`${
+                  userData.role === 'admin'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                    : userData.role === 'teacher' 
+                    ? 'bg-gradient-to-r from-indigo-500 to-[#9078e2]' 
+                    : 'bg-gradient-to-r from-indigo-500 to-[#9078e2]'
+                } text-white p-3 rounded-full shadow hover:shadow-lg transition`}
               >
                 <Send className="w-5 h-5" />
               </motion.button>

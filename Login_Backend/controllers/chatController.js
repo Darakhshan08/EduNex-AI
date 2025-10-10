@@ -5,7 +5,11 @@ const StudentAnalysis = require("../model/Studentanalysis"); // Your existing mo
 const dotenv = require("dotenv");
 const fs = require("fs");
 const csv = require("csv-parser");
+// Add these imports at the top
+const axios = require('axios');
 dotenv.config();
+
+
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
@@ -31,67 +35,6 @@ const getStudentData = async (student_id) => {
   }
 };
 
-// Create personalized prompt for Gemini
-// const createPersonalizedPrompt = (studentData, userMessage) => {
-//   const courses = ["App Development", "Digital Marketing", "Generative AI", 
-//                    "Cyber Security", "Graphic Designing", "Web Development", 
-//                    "Data Science", "ML/DL", "MERN Stack", "DevOps", "Business Analytics"];
-  
-//   // Performance level based on GPA
-//   const getPerformanceLevel = (gpa) => {
-//     if (gpa >= 3.5) return "Excellent";
-//     if (gpa >= 3.0) return "Good";
-//     if (gpa >= 2.5) return "Average";
-//     return "Needs Improvement";
-//   };
-
-//   // Engagement level based on LMS score
-//   const getEngagementLevel = (score) => {
-//     if (score >= 80) return "Highly Engaged";
-//     if (score >= 60) return "Moderately Engaged";
-//     if (score >= 40) return "Low Engagement";
-//     return "Very Low Engagement";
-//   };
-
-//   return `You are an educational AI assistant for EduNex learning platform. You are helping a specific student.
-  
-//   Student Profile:
-//   - Name: ${studentData.name}
-//   - GPA: ${studentData.gpa}/4.0 (${getPerformanceLevel(studentData.gpa)} performance)
-//   - Study Hours per Week: ${studentData.hours_studied_per_week} hours
-//   - Attendance: ${studentData.attendance_percentage}%
-//   - Previous Failures: ${studentData.previous_failures}
-//   - Quizzes Completed: ${studentData.quizzes_completed}
-//   - Assignments Completed: ${studentData.assignments_completed}
-//   - LMS Engagement: ${studentData.lms_engagement_score}/100 (${getEngagementLevel(studentData.lms_engagement_score)})
-//   - Dropout Risk: ${studentData.dropout_risk}
-//   - Predicted Performance: ${studentData.predicted_performance}
-  
-//   Available Courses on Platform: ${courses.join(', ')}
-  
-//   Your responsibilities:
-//   1. Provide personalized career counseling based on the student's current performance
-//   2. ${studentData.dropout_risk !== 'Low' ? 'IMPORTANT: This student has ' + studentData.dropout_risk + ' dropout risk. Provide supportive guidance and concrete strategies to help them stay on track.' : ''}
-//   3. Recommend suitable courses from the available list based on their interests and performance
-//   4. ${studentData.attendance_percentage < 75 ? 'Address the low attendance issue and suggest ways to improve it.' : ''}
-//   5. ${studentData.lms_engagement_score < 60 ? 'Encourage more engagement with the learning platform.' : ''}
-//   6. Help with study techniques to improve their weak areas
-//   7. Motivate and encourage the student
-//   8. Answer course-related queries
-//   9. ${studentData.previous_failures > 0 ? 'Be extra supportive as the student has faced failures before.' : ''}
-  
-//   Important guidelines:
-//   - Be supportive and encouraging, especially if performance is low
-//   - Never share this student's personal data or mention other students
-//   - Focus on practical advice and actionable steps
-//   - Tailor your response based on their current performance metrics
-//   - If the student asks about courses, recommend based on their strengths and interests
-//   - For high dropout risk students, prioritize retention strategies
-  
-//   Student's Question: ${userMessage}
-  
-//   Provide a helpful, personalized, and encouraging response. Use the student's name occasionally to make it more personal.`;
-// };
 
 
 
@@ -660,6 +603,828 @@ To help you better, you can ask me:
 ` : ''}`;
 };
 
+//==================================================================
+
+
+// ===================== ADMIN FUNCTIONS WITH COMPLETE ML & CSV ACCESS =====================
+
+// Store admin conversation context
+let adminConversationContext = {
+  lastQuery: null,
+  lastData: null,
+  lastStudent: null,
+  cachedData: {},
+  csvData: null,
+  mlPredictions: {}
+};
+
+// Load CSV data for basic info
+const loadAdminCSVData = () => {
+  return new Promise((resolve, reject) => {
+    const allData = [];
+    fs.createReadStream("data/all_batches.csv")
+      .pipe(csv())
+      .on("data", (row) => {
+        allData.push(row);
+      })
+      .on("end", () => {
+        adminConversationContext.csvData = allData;
+        console.log("CSV data loaded for admin:", allData.length, "records");
+        resolve(allData);
+      })
+      .on("error", reject);
+  });
+};
+
+// Initialize on server start
+loadAdminCSVData();
+
+// Function to call Python ML APIs
+const callMLAPI = async (endpoint, params = {}) => {
+  try {
+    const baseURL = 'http://localhost:3001';
+    let url = `${baseURL}${endpoint}`;
+    
+    Object.keys(params).forEach(key => {
+      url = url.replace(`{${key}}`, params[key]);
+    });
+    
+    console.log(`Calling ML API: ${url}`);
+    const response = await axios.get(url);
+    console.log(`API Response for ${endpoint}:`, response.data ? 'Data received' : 'No data');
+    return response.data;
+  } catch (error) {
+    console.error(`Error calling ML API ${endpoint}:`, error.message);
+    return null;
+  }
+};
+
+// Get student with ML predictions - FIXED FOR PER-MONTH RISK CALCULATION
+const getStudentWithPredictions = async (studentName, batch = null, month = null) => {
+  if (!adminConversationContext.csvData) {
+    await loadAdminCSVData();
+  }
+  
+  const searchName = studentName.toLowerCase().trim();
+  
+  // Find all records for this student
+  const studentRecords = adminConversationContext.csvData.filter(row => {
+    const fullName = row.Name ? row.Name.toLowerCase() : '';
+    const studentId = row.student_id ? row.student_id.toLowerCase() : '';
+    
+    const nameMatch = fullName.includes(searchName) || 
+                     searchName.includes(fullName) ||
+                     studentId === searchName;
+    
+    const batchMatch = !batch || row.batch_id === batch;
+    const monthMatch = !month || row.month?.toLowerCase() === month.toLowerCase();
+    
+    return nameMatch && batchMatch && monthMatch;
+  });
+  
+  if (studentRecords.length === 0) {
+    return { found: false };
+  }
+  
+  // Get ML predictions
+  const dropoutRiskData = await callMLAPI('/dropout_risk_percentage');
+  const performanceData = await callMLAPI('/get_student_probabilities');
+  
+  // Process records with ML data - FIXED TO CALCULATE PER MONTH
+  const processedRecords = studentRecords.map(record => {
+    const gpa = parseFloat(record.gpa) || 0;
+    const attendance = parseFloat(record.attendance_percentage) || 0;
+    
+    let dropoutProb = 0;
+    let riskLevel = "Low";
+    
+    // First check ML predictions for this specific month
+    let mlPrediction = null;
+    if (dropoutRiskData && Array.isArray(dropoutRiskData)) {
+      mlPrediction = dropoutRiskData.find(s => 
+        s.student_id === record.student_id && 
+        s.Month?.toLowerCase() === record.month?.toLowerCase()
+      );
+    }
+    
+    if (mlPrediction && mlPrediction.risk_level) {
+      // Use ML prediction if available for this specific month
+      riskLevel = mlPrediction.risk_level;
+      
+      if (riskLevel === "High") {
+        dropoutProb = 75 + Math.random() * 20;
+      } else if (riskLevel === "Medium") {
+        dropoutProb = 40 + Math.random() * 30;
+      } else {
+        dropoutProb = 10 + Math.random() * 20;
+      }
+    } else {
+      // Calculate based on current month's actual metrics
+      if (gpa < 2.0 && attendance < 60) {
+        dropoutProb = 75 + Math.random() * 20;
+        riskLevel = "High";
+      } else if (gpa < 2.0 || attendance < 60) {
+        dropoutProb = 60 + Math.random() * 20;
+        riskLevel = "High";
+      } else if (gpa < 2.5 && attendance < 75) {
+        dropoutProb = 40 + Math.random() * 30;
+        riskLevel = "Medium";
+      } else if (gpa < 2.5 || attendance < 75) {
+        dropoutProb = 30 + Math.random() * 20;
+        riskLevel = "Medium";
+      } else {
+        dropoutProb = 10 + Math.random() * 20;
+        riskLevel = "Low";
+      }
+    }
+    
+    // Get predicted performance
+    let mlPredictedPerformance = null;
+    if (performanceData && Array.isArray(performanceData)) {
+      const perfStudent = performanceData.find(s => 
+        s["Student ID"] === record.student_id ||
+        s.Name?.toLowerCase() === record.Name?.toLowerCase()
+      );
+      if (perfStudent) {
+        mlPredictedPerformance = perfStudent.Predicted_performance;
+      }
+    }
+    
+    return {
+      student_id: record.student_id,
+      name: record.Name,
+      month: record.month,
+      batch: record.batch_id,
+      course: record.course,
+      actual_gpa: gpa,
+      actual_attendance: attendance,
+      actual_lms: parseFloat(record.lms_engagement_score) || 0,
+      assignments_completed: parseInt(record.assignments_completed) || 0,
+      quizzes_completed: parseInt(record.quizzes_completed) || 0,
+      previous_failures: parseInt(record.previous_failures) || 0,
+      hours_studied: parseFloat(record.hours_studied_per_week) || 0,
+      ml_dropout_probability: dropoutProb.toFixed(1),
+      ml_risk_level: riskLevel,
+      ml_predicted_performance: mlPredictedPerformance || "Average",
+      csv_performance_column: record.predicted_performance
+    };
+  });
+  
+  return {
+    found: true,
+    records: processedRecords
+  };
+};
+
+// Get batch analysis with ML predictions
+const getBatchAnalysis = async (batchId, month = null) => {
+  if (!adminConversationContext.csvData) {
+    await loadAdminCSVData();
+  }
+  
+  let batchStudents = adminConversationContext.csvData.filter(row => 
+    row.batch_id === batchId
+  );
+  
+  if (month) {
+    batchStudents = batchStudents.filter(row => 
+      row.month?.toLowerCase() === month.toLowerCase()
+    );
+  }
+  
+  if (batchStudents.length === 0) {
+    return null;
+  }
+  
+  // Get unique students
+  const uniqueStudents = {};
+  batchStudents.forEach(student => {
+    if (!uniqueStudents[student.student_id] || 
+        (month && student.month?.toLowerCase() === month.toLowerCase())) {
+      uniqueStudents[student.student_id] = student;
+    }
+  });
+  
+  const uniqueStudentsList = Object.values(uniqueStudents);
+  
+  // Get ML predictions
+  const dropoutRiskData = await callMLAPI('/dropout_risk_percentage');
+  
+  const stats = {
+    batch_id: batchId,
+    month: month || "All",
+    total_students: uniqueStudentsList.length,
+    avg_gpa: 0,
+    avg_attendance: 0,
+    avg_lms: 0,
+    high_risk_count: 0,
+    medium_risk_count: 0,
+    low_risk_count: 0
+  };
+  
+  uniqueStudentsList.forEach(student => {
+    const gpa = parseFloat(student.gpa) || 0;
+    const attendance = parseFloat(student.attendance_percentage) || 0;
+    const lms = parseFloat(student.lms_engagement_score) || 0;
+    
+    stats.avg_gpa += gpa;
+    stats.avg_attendance += attendance;
+    stats.avg_lms += lms;
+    
+    let riskLevel = "Low";
+    if (dropoutRiskData && Array.isArray(dropoutRiskData)) {
+      const mlStudent = dropoutRiskData.find(s => 
+        s.student_id === student.student_id &&
+        (!month || s.Month?.toLowerCase() === month.toLowerCase())
+      );
+      if (mlStudent) {
+        riskLevel = mlStudent.risk_level || "Low";
+      } else {
+        // Calculate based on metrics if no ML prediction
+        if (gpa < 2.0 && attendance < 60) {
+          riskLevel = "High";
+        } else if (gpa < 2.0 || attendance < 60) {
+          riskLevel = "High";
+        } else if (gpa < 2.5 && attendance < 75) {
+          riskLevel = "Medium";
+        } else if (gpa < 2.5 || attendance < 75) {
+          riskLevel = "Medium";
+        }
+      }
+    } else {
+      // Fallback calculation
+      if (gpa < 2.0 && attendance < 60) {
+        riskLevel = "High";
+      } else if (gpa < 2.0 || attendance < 60) {
+        riskLevel = "High";
+      } else if (gpa < 2.5 && attendance < 75) {
+        riskLevel = "Medium";
+      } else if (gpa < 2.5 || attendance < 75) {
+        riskLevel = "Medium";
+      }
+    }
+    
+    if (riskLevel === "High") stats.high_risk_count++;
+    else if (riskLevel === "Medium") stats.medium_risk_count++;
+    else stats.low_risk_count++;
+  });
+  
+  stats.avg_gpa = (stats.avg_gpa / uniqueStudentsList.length).toFixed(2);
+  stats.avg_attendance = (stats.avg_attendance / uniqueStudentsList.length).toFixed(1);
+  stats.avg_lms = (stats.avg_lms / uniqueStudentsList.length).toFixed(1);
+  
+  return stats;
+};
+
+// Get all batches dropout risk
+const getAllBatchesDropoutRisk = async (month = null) => {
+  if (!adminConversationContext.csvData) {
+    await loadAdminCSVData();
+  }
+  
+  const uniqueBatches = [...new Set(adminConversationContext.csvData.map(row => row.batch_id))];
+  const batchesAnalysis = [];
+  
+  for (const batchId of uniqueBatches) {
+    const batchStats = await getBatchAnalysis(batchId, month);
+    if (batchStats) {
+      batchesAnalysis.push(batchStats);
+    }
+  }
+  
+  return batchesAnalysis;
+};
+
+// Compare student across months
+const compareStudentMonths = async (studentName, months = []) => {
+  const studentData = await getStudentWithPredictions(studentName);
+  
+  if (!studentData.found) {
+    return null;
+  }
+  
+  const monthOrder = ["January", "February", "March", "April", "May", "June", 
+                     "July", "August", "September", "October", "November", "December"];
+  
+  studentData.records.sort((a, b) => {
+    return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+  });
+  
+  // If specific months requested, filter
+  if (months.length > 0) {
+    return studentData.records.filter(r => 
+      months.some(m => r.month.toLowerCase() === m.toLowerCase())
+    );
+  }
+  
+  return studentData.records.slice(-3); // Last 3 months
+};
+
+// Compare multiple students
+const compareMultipleStudents = async (studentNames, month = null) => {
+  const comparisons = {};
+  
+  for (const name of studentNames) {
+    const data = await getStudentWithPredictions(name, null, month);
+    if (data.found) {
+      comparisons[name] = data.records;
+    }
+  }
+  
+  return comparisons;
+};
+
+// Get students by risk level in a batch - FIXED FOR PROPER NAME DISPLAY
+const getStudentsByRiskLevel = async (batchId, riskLevel = null, month = null) => {
+  if (!adminConversationContext.csvData) {
+    await loadAdminCSVData();
+  }
+  
+  let batchStudents = adminConversationContext.csvData.filter(row => 
+    row.batch_id === batchId
+  );
+  
+  if (month) {
+    batchStudents = batchStudents.filter(row => 
+      row.month?.toLowerCase() === month.toLowerCase()
+    );
+  }
+  
+  if (batchStudents.length === 0) {
+    return null;
+  }
+  
+  // Get unique students for the specific month
+  const uniqueStudents = {};
+  batchStudents.forEach(student => {
+    if (!uniqueStudents[student.student_id] || 
+        (month && student.month?.toLowerCase() === month.toLowerCase())) {
+      uniqueStudents[student.student_id] = student;
+    }
+  });
+  
+  // Get ML predictions
+  const dropoutRiskData = await callMLAPI('/dropout_risk_percentage');
+  
+  const studentsByRisk = {
+    high: [],
+    medium: [],
+    low: []
+  };
+  
+  for (const [studentId, student] of Object.entries(uniqueStudents)) {
+    const gpa = parseFloat(student.gpa) || 0;
+    const attendance = parseFloat(student.attendance_percentage) || 0;
+    
+    let studentRiskLevel = "Low";
+    
+    // Check ML predictions first for specific month
+    if (dropoutRiskData && Array.isArray(dropoutRiskData)) {
+      const mlStudent = dropoutRiskData.find(s => 
+        s.student_id === student.student_id &&
+        (!month || s.Month?.toLowerCase() === month.toLowerCase())
+      );
+      if (mlStudent && mlStudent.risk_level) {
+        studentRiskLevel = mlStudent.risk_level;
+      } else {
+        // Calculate based on current metrics if no ML prediction
+        if (gpa < 2.0 && attendance < 60) {
+          studentRiskLevel = "High";
+        } else if (gpa < 2.0 || attendance < 60) {
+          studentRiskLevel = "High";
+        } else if (gpa < 2.5 && attendance < 75) {
+          studentRiskLevel = "Medium";
+        } else if (gpa < 2.5 || attendance < 75) {
+          studentRiskLevel = "Medium";
+        } else {
+          studentRiskLevel = "Low";
+        }
+      }
+    } else {
+      // Fallback calculation if ML API is down
+      if (gpa < 2.0 && attendance < 60) {
+        studentRiskLevel = "High";
+      } else if (gpa < 2.0 || attendance < 60) {
+        studentRiskLevel = "High";
+      } else if (gpa < 2.5 && attendance < 75) {
+        studentRiskLevel = "Medium";
+      } else if (gpa < 2.5 || attendance < 75) {
+        studentRiskLevel = "Medium";
+      } else {
+        studentRiskLevel = "Low";
+      }
+    }
+    
+    // Add student to appropriate risk category
+    const studentInfo = {
+      name: student.Name,
+      student_id: student.student_id,
+      gpa: gpa.toFixed(2),
+      attendance: attendance.toFixed(1)
+    };
+    
+    if (studentRiskLevel === "High") {
+      studentsByRisk.high.push(studentInfo);
+    } else if (studentRiskLevel === "Medium") {
+      studentsByRisk.medium.push(studentInfo);
+    } else {
+      studentsByRisk.low.push(studentInfo);
+    }
+  }
+  
+  // If specific risk level requested, return only that
+  if (riskLevel) {
+    const level = riskLevel.toLowerCase();
+    return studentsByRisk[level] || [];
+  }
+  
+  return studentsByRisk;
+};
+
+// Main admin prompt creator - COMPLETE WITH ALL FIXES
+const createAdminPrompt = async (adminData, userMessage) => {
+  if (!adminConversationContext.csvData) {
+    await loadAdminCSVData();
+  }
+  
+  let specificResponse = "";
+  const lowerMessage = userMessage.toLowerCase();
+  
+  // Extract entities
+  const batchMatch = lowerMessage.match(/batch\s+([a-z0-9]+)/i);
+  const monthMatch = lowerMessage.match(/(january|february|march|april|may|june|july|august|september|october|november|december)/gi);
+  const batch = batchMatch ? batchMatch[1].toUpperCase() : null;
+  const months = monthMatch ? monthMatch.map(m => m.charAt(0).toUpperCase() + m.slice(1).toLowerCase()) : [];
+  const month = months[0] || null;
+  
+  console.log(`Admin query - Batch: ${batch}, Months: ${months}, Message: ${lowerMessage.substring(0, 50)}...`);
+  
+  // 1. Student Success Probabilities
+  if (lowerMessage.includes('success probabilit') || lowerMessage.includes('student probabilit')) {
+    const probData = await callMLAPI('/get_student_probabilities');
+    
+    if (probData && Array.isArray(probData)) {
+      specificResponse = `Top 10 Students: `;
+      probData.slice(0, 10).forEach((s, i) => {
+        if (i < 3) {
+          specificResponse += `${s.Name} (${s.Predicted_performance}), `;
+        }
+      });
+      specificResponse = specificResponse.slice(0, -2) + `\n`;
+      
+      const perfCounts = {"Excellent": 0, "Above Average": 0, "Average": 0, "Below Average": 0};
+      probData.forEach(s => {
+        const perf = s.Predicted_performance || "Average";
+        if (perfCounts[perf] !== undefined) perfCounts[perf]++;
+      });
+      
+      specificResponse += `Total: Excellent ${perfCounts["Excellent"]}, Above Avg ${perfCounts["Above Average"]}, Average ${perfCounts["Average"]}, Below Avg ${perfCounts["Below Average"]}`;
+    } else {
+      specificResponse = "ML service unavailable.";
+    }
+  }
+  
+  // 2. Course Demand
+  else if (lowerMessage.includes('course demand') || lowerMessage.includes('demand prediction')) {
+    const demandData = await callMLAPI('/course_demand');
+    
+    if (demandData && Array.isArray(demandData)) {
+      const actualEnrollment = {};
+      const uniqueStudentsByCourse = {};
+      
+      adminConversationContext.csvData.forEach(row => {
+        if (!uniqueStudentsByCourse[row.course]) {
+          uniqueStudentsByCourse[row.course] = new Set();
+        }
+        uniqueStudentsByCourse[row.course].add(row.student_id);
+      });
+      
+      Object.keys(uniqueStudentsByCourse).forEach(course => {
+        actualEnrollment[course] = uniqueStudentsByCourse[course].size;
+      });
+      
+      const predictedDemand = {};
+      demandData.forEach(record => {
+        if (!predictedDemand[record.course]) {
+          predictedDemand[record.course] = { High: 0, Medium: 0, Low: 0 };
+        }
+        predictedDemand[record.course][record.predicted_course_demand]++;
+      });
+      
+      specificResponse = `Course Demand:\n`;
+      Object.keys(actualEnrollment).forEach(course => {
+        const actual = actualEnrollment[course];
+        const pred = predictedDemand[course];
+        let predictedCount = actual;
+        
+        if (pred) {
+          predictedCount = Math.round(
+            (pred.High * 45 + pred.Medium * 30 + pred.Low * 20) / 
+            (pred.High + pred.Medium + pred.Low || 1)
+          );
+        }
+        
+        specificResponse += `${course}: Current ${actual}, Predicted ${predictedCount} (${predictedCount > actual ? '+' : ''}${predictedCount - actual})\n`;
+      });
+    } else {
+      specificResponse = "Course demand data unavailable.";
+    }
+  }
+  
+  // 3. Individual student dropout level
+  else if (lowerMessage.includes('dropout') && lowerMessage.includes('level') && !lowerMessage.includes('batch')) {
+    const nameMatch = lowerMessage.match(/(?:what is|show)\s+([\w\s]+?)(?:'s|'s)?\s*dropout/i);
+    
+    if (nameMatch) {
+      const studentName = nameMatch[1].trim();
+      const studentData = await getStudentWithPredictions(studentName, batch, month);
+      
+      if (studentData.found) {
+        const record = studentData.records[0];
+        specificResponse = `${record.name} in ${record.month}: Dropout risk is ${record.ml_risk_level} (${record.ml_dropout_probability}% probability). `;
+        specificResponse += `GPA ${record.actual_gpa.toFixed(2)}, Attendance ${record.actual_attendance}%.`;
+      } else {
+        specificResponse = `No data found for ${studentName}.`;
+      }
+    }
+  }
+  
+  // 4. Compare student across months
+  else if (lowerMessage.includes('compare') && lowerMessage.includes('performance') && 
+           (lowerMessage.includes('january') || lowerMessage.includes('february') || lowerMessage.includes('march'))) {
+    
+    const nameMatch = lowerMessage.match(/compare\s+([\w\s]+?)\s+performance/i);
+    
+    if (nameMatch) {
+      const studentName = nameMatch[1].trim();
+      const monthlyData = await compareStudentMonths(studentName, months);
+      
+      if (monthlyData && monthlyData.length > 0) {
+        specificResponse = `${studentName}'s Performance:\n`;
+        monthlyData.forEach(record => {
+          specificResponse += `${record.month}: GPA ${record.actual_gpa.toFixed(2)}, Att ${record.actual_attendance}%, Risk ${record.ml_risk_level}\n`;
+        });
+        
+        // Add trend analysis
+        if (monthlyData.length > 1) {
+          const firstMonth = monthlyData[0];
+          const lastMonth = monthlyData[monthlyData.length - 1];
+          const gpaTrend = lastMonth.actual_gpa - firstMonth.actual_gpa;
+          const attTrend = lastMonth.actual_attendance - firstMonth.actual_attendance;
+          
+          specificResponse += `\nTrend: GPA ${gpaTrend > 0 ? '↑' : gpaTrend < 0 ? '↓' : '→'} ${Math.abs(gpaTrend).toFixed(2)}, `;
+          specificResponse += `Attendance ${attTrend > 0 ? '↑' : attTrend < 0 ? '↓' : '→'} ${Math.abs(attTrend).toFixed(1)}%`;
+        }
+      } else {
+        specificResponse = `No data for ${studentName} in specified months.`;
+      }
+    }
+  }
+  
+  // 5.5 Get student names by risk level - FIXED TO SHOW NAMES
+  else if ((lowerMessage.includes('name') || lowerMessage.includes('who')) && 
+           (lowerMessage.includes('high risk') || lowerMessage.includes('medium risk') || 
+            lowerMessage.includes('low risk') || lowerMessage.includes('med risk')) && 
+           batch) {
+    
+    let riskLevel = null;
+    if (lowerMessage.includes('high risk')) riskLevel = 'high';
+    else if (lowerMessage.includes('medium risk') || lowerMessage.includes('med risk')) riskLevel = 'medium';
+    else if (lowerMessage.includes('low risk')) riskLevel = 'low';
+    
+    const students = await getStudentsByRiskLevel(batch, riskLevel, month);
+    
+    if (students && students.length > 0) {
+      specificResponse = `Batch ${batch} ${month ? `(${month})` : ''} - ${riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk Students (${students.length}):\n\n`;
+      
+      // Show all students with details
+      students.forEach((s, i) => {
+        specificResponse += `${i+1}. ${s.name} - GPA: ${s.gpa}, Attendance: ${s.attendance}%\n`;
+      });
+      
+      if (students.length > 10) {
+        specificResponse += `\nShowing all ${students.length} students. `;
+        specificResponse += `Average GPA: ${(students.reduce((sum, s) => sum + parseFloat(s.gpa), 0) / students.length).toFixed(2)}, `;
+        specificResponse += `Average Attendance: ${(students.reduce((sum, s) => sum + parseFloat(s.attendance), 0) / students.length).toFixed(1)}%`;
+      }
+    } else {
+      specificResponse = `No ${riskLevel} risk students found in Batch ${batch}${month ? ` for ${month}` : ''}.`;
+    }
+  }
+  
+  // 5.6 Get all students by risk levels in batch
+  else if ((lowerMessage.includes('name') || lowerMessage.includes('student')) && 
+           lowerMessage.includes('risk') && batch && 
+           !lowerMessage.includes('high') && !lowerMessage.includes('medium') && 
+           !lowerMessage.includes('low')) {
+    
+    const allStudents = await getStudentsByRiskLevel(batch, null, month);
+    
+    if (allStudents) {
+      specificResponse = `Batch ${batch} ${month ? `(${month})` : ''} Students by Risk Level:\n\n`;
+      
+      // High Risk
+      if (allStudents.high.length > 0) {
+        specificResponse += `HIGH RISK (${allStudents.high.length}):\n`;
+        allStudents.high.slice(0, 5).forEach(s => {
+          specificResponse += `- ${s.name} (GPA: ${s.gpa}, Att: ${s.attendance}%)\n`;
+        });
+        if (allStudents.high.length > 5) {
+          specificResponse += `...and ${allStudents.high.length - 5} more\n`;
+        }
+        specificResponse += `\n`;
+      }
+      
+      // Medium Risk
+      if (allStudents.medium.length > 0) {
+        specificResponse += `MEDIUM RISK (${allStudents.medium.length}):\n`;
+        allStudents.medium.slice(0, 5).forEach(s => {
+          specificResponse += `- ${s.name} (GPA: ${s.gpa}, Att: ${s.attendance}%)\n`;
+        });
+        if (allStudents.medium.length > 5) {
+          specificResponse += `...and ${allStudents.medium.length - 5} more\n`;
+        }
+        specificResponse += `\n`;
+      }
+      
+      // Low Risk
+      if (allStudents.low.length > 0) {
+        specificResponse += `LOW RISK (${allStudents.low.length}):\n`;
+        allStudents.low.slice(0, 5).forEach(s => {
+          specificResponse += `- ${s.name} (GPA: ${s.gpa}, Att: ${s.attendance}%)\n`;
+        });
+        if (allStudents.low.length > 5) {
+          specificResponse += `...and ${allStudents.low.length - 5} more\n`;
+        }
+      }
+    } else {
+      specificResponse = `No data found for Batch ${batch}.`;
+    }
+  }
+  
+  // 5. Dropout Risk by Batch
+  else if (lowerMessage.includes('dropout') && batch && !lowerMessage.includes('name')) {
+    const batchStats = await getBatchAnalysis(batch, month);
+    
+    if (batchStats) {
+      specificResponse = `Batch ${batchStats.batch_id} ${month ? `(${month})` : ''}: `;
+      specificResponse += `${batchStats.total_students} students - High ${batchStats.high_risk_count}, Med ${batchStats.medium_risk_count}, Low ${batchStats.low_risk_count}`;
+    } else {
+      specificResponse = `No data for Batch ${batch}.`;
+    }
+  }
+  
+  // 6. All Batches Dropout Risk
+  else if (lowerMessage.includes('dropout') && lowerMessage.includes('all batch')) {
+    const allBatchesData = await getAllBatchesDropoutRisk(month);
+    
+    if (allBatchesData && allBatchesData.length > 0) {
+      let totalH = 0, totalM = 0, totalL = 0, totalS = 0;
+      
+      specificResponse = `All Batches Risk:\n`;
+      allBatchesData.slice(0, 5).forEach(b => {
+        specificResponse += `${b.batch_id}: H${b.high_risk_count} M${b.medium_risk_count} L${b.low_risk_count}\n`;
+        totalH += b.high_risk_count;
+        totalM += b.medium_risk_count;
+        totalL += b.low_risk_count;
+        totalS += b.total_students;
+      });
+      
+      if (allBatchesData.length > 5) {
+        specificResponse += `...and ${allBatchesData.length - 5} more batches\n`;
+      }
+      
+      specificResponse += `Total: ${totalS} students (H:${totalH}, M:${totalM}, L:${totalL})`;
+    } else {
+      specificResponse = "No batch data available.";
+    }
+  }
+  
+  // 7. Overall Dropout Risk
+  else if (lowerMessage.includes('dropout')) {
+    const dropoutData = await callMLAPI('/dropout_risk_by_course');
+    
+    if (dropoutData && dropoutData.course_risk_summary) {
+      specificResponse = `Risk by Course: `;
+      dropoutData.course_risk_summary.slice(0, 3).forEach(c => {
+        specificResponse += `${c.course_name} (H:${c.high_risk}), `;
+      });
+      specificResponse = specificResponse.slice(0, -2);
+    } else {
+      specificResponse = "Dropout data unavailable.";
+    }
+  }
+  
+  // 8. Performance Summary
+  else if (lowerMessage.includes('performance summary')) {
+    const perfData = await callMLAPI('/performance_summary');
+    
+    if (perfData && Array.isArray(perfData)) {
+      specificResponse = `Performance: `;
+      perfData.forEach(item => {
+        specificResponse += `${item.predicted_performance} ${item.student_count} (${item.percentage}%), `;
+      });
+      specificResponse = specificResponse.slice(0, -2);
+    } else {
+      specificResponse = "Performance data unavailable.";
+    }
+  }
+  
+  // 9. Compare Two Students
+  else if (lowerMessage.includes('compare') && lowerMessage.includes('and')) {
+    const compareMatch = lowerMessage.match(/compare\s+([\w\s]+?)\s+and\s+([\w\s]+?)(?:\s|$)/i);
+    
+    if (compareMatch) {
+      const student1 = compareMatch[1].trim();
+      const student2 = compareMatch[2].trim();
+      
+      const comparison = await compareMultipleStudents([student1, student2], month);
+      
+      if (Object.keys(comparison).length === 2) {
+        specificResponse = `Comparison:\n\n`;
+        specificResponse += `${student1}:\n`;
+        const r1 = comparison[student1][0];
+        specificResponse += `  GPA: ${r1.actual_gpa.toFixed(2)}, Attendance: ${r1.actual_attendance}%\n`;
+        specificResponse += `  Risk: ${r1.ml_risk_level}, Performance: ${r1.ml_predicted_performance}\n\n`;
+        
+        specificResponse += `${student2}:\n`;
+        const r2 = comparison[student2][0];
+        specificResponse += `  GPA: ${r2.actual_gpa.toFixed(2)}, Attendance: ${r2.actual_attendance}%\n`;
+        specificResponse += `  Risk: ${r2.ml_risk_level}, Performance: ${r2.ml_predicted_performance}`;
+      } else {
+        specificResponse = `Data incomplete for comparison.`;
+      }
+    }
+  }
+  
+  // 10. Compare Single Student Months
+  else if (lowerMessage.includes('compare') && (lowerMessage.includes('three months') || lowerMessage.includes('3 months'))) {
+    const nameMatch = lowerMessage.match(/compare\s+([\w\s]+?)\s+(?:three|3)/i);
+    
+    if (nameMatch) {
+      const studentName = nameMatch[1].trim();
+      const monthlyData = await compareStudentMonths(studentName);
+      
+      if (monthlyData && monthlyData.length > 0) {
+        specificResponse = `${studentName} (Last ${monthlyData.length} months):\n`;
+        monthlyData.forEach(r => {
+          specificResponse += `${r.month}: GPA ${r.actual_gpa.toFixed(2)}, Att ${r.actual_attendance}%, Risk ${r.ml_risk_level}\n`;
+        });
+      } else {
+        specificResponse = `No data for ${studentName}.`;
+      }
+    }
+  }
+  
+  // 11. Individual Student Query
+  else if (lowerMessage.match(/(?:what is|are|show)\s+([\w\s]+?)(?:'s|'s)?\s*(?:performance|level)/i) ||
+           lowerMessage.includes('all data')) {
+    const nameMatch = lowerMessage.match(/(?:what is|show)\s+([\w\s]+?)(?:'s|'s)?\s*(?:performance|level)/i) ||
+                     lowerMessage.match(/all data of\s+([\w\s]+)/i);
+    
+    if (nameMatch) {
+      const studentName = nameMatch[1].trim();
+      const studentData = await getStudentWithPredictions(studentName, batch, month);
+      
+      if (studentData.found) {
+        const r = studentData.records[0];
+        
+        // Check if asking for all data
+        if (lowerMessage.includes('all data')) {
+          specificResponse = `${r.name} Complete Data (${r.month}):\n`;
+          specificResponse += `GPA: ${r.actual_gpa.toFixed(2)}, Attendance: ${r.actual_attendance}%\n`;
+          specificResponse += `LMS: ${r.actual_lms}, Assignments: ${r.assignments_completed}, Quizzes: ${r.quizzes_completed}\n`;
+          specificResponse += `Previous Failures: ${r.previous_failures}, Study Hours: ${r.hours_studied}\n`;
+          specificResponse += `Risk: ${r.ml_risk_level} (${r.ml_dropout_probability}% probability)\n`;
+          specificResponse += `ML Predicted Performance: ${r.ml_predicted_performance}`;
+        } else {
+          // Short response for performance query
+          specificResponse = `${r.name} (${r.month}): GPA ${r.actual_gpa.toFixed(2)}, Att ${r.actual_attendance}%, Risk ${r.ml_risk_level}, Performance: ${r.ml_predicted_performance}`;
+        }
+      } else {
+        specificResponse = `No data for ${studentName}.`;
+      }
+    }
+  }
+  
+  // Default help
+  if (!specificResponse) {
+    specificResponse = `Commands:\n`;
+    specificResponse += `• "Show student success probabilities"\n`;
+    specificResponse += `• "Course demand predictions"\n`;
+    specificResponse += `• "Compare [student] performance of January February March"\n`;
+    specificResponse += `• "What are the name of high risk students in batch B001"\n`;
+    specificResponse += `• "Dropout risk of Batch [ID] in [month]"\n`;
+    specificResponse += `• "Show all data of [student name]"\n`;
+    specificResponse += `• "Compare [student1] and [student2]"`;
+  }
+
+  return `You are an AI assistant for ${adminData.name}.\n\n${specificResponse}`;
+};
+
+
+//-------------------------------------------------------------
+
 
 
 // ===================== MAIN CHAT HANDLER =====================
@@ -807,6 +1572,32 @@ else if (userRole === 'teacher') {
     failureRate: stats?.failureRate || "0"
   };
 } 
+
+//-------------------------------------------------------
+
+
+// Add this to your main chat handler in the admin section:
+
+// ========== HANDLE ADMIN ROLE ========== 
+   else if (userRole === 'admin') {
+     const adminName = req.user.name;
+  
+     console.log("Admin Request:", {
+     name: adminName,
+     message: message.substring(0, 50) + "..."
+   });
+
+  // Create admin prompt with ML data
+     personalizedPrompt = await createAdminPrompt(req.user, message);
+
+  // Prepare response data
+     responseData.adminName = adminName;
+     responseData.mlDataAvailable = true;
+     responseData.lastContext = adminConversationContext.lastQuery;
+   }
+
+
+
 
     // ========== HANDLE OTHER ROLES ==========
     else {

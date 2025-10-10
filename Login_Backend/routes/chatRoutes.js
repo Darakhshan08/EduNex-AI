@@ -4,7 +4,7 @@ const { protect } = require("../middleware/authMiddleware");
 
 const chatRoutes = express.Router();
 
-// Chat endpoint - works for both students and teachers
-chatRoutes.post("/",protect(["student", "teacher"]), chatWithGemini);
+// Update the protect middleware to include admin
+chatRoutes.post("/", protect(["student", "teacher", "admin"]), chatWithGemini);
 
 module.exports = chatRoutes;
